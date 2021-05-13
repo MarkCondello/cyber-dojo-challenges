@@ -44,7 +44,6 @@
         @endfor
         <td>{{ $total ?? 'N/A'}} </td>
     </tr>
- 
   </tbody>
 </table>
 

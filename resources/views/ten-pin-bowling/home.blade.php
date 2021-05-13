@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-@component('partials.game-layout', [
-    'frames' => $frames ?? null, 
-    'msg' => $msg ?? null,
-    'total' => $total ?? null,
-    ])
+    @component('ten-pin-bowling.partials.game-layout', [
+        'frames' => $frames ?? null, 
+        'msg' => $msg ?? null,
+        'total' => $total ?? null,
+        ])
         @section('buttonSection')
         <form action="{{ $route }}" method="POST"> 
             @csrf
@@ -13,8 +13,5 @@
         </form>
         @endsection
     @endcomponent
-
-    @isset($prevFrame)
-        @dump($prevFrame)
-    @endisset
+ 
 @endsection

@@ -1,8 +1,7 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-12">
-            <!-- @dump($frames) -->
-        @include('partials.score-card')
+        @include('ten-pin-bowling.partials.score-card')
         </div>
         <div class="col-md-8">
             <div class="card">
