@@ -7,11 +7,14 @@
         'total' => $total ?? null,
         ])
         @section('buttonSection')
+        @if(isset($route))
         <form action="{{ $route }}" method="POST"> 
             @csrf
             <button class="btn btn-primary" >{{ $btnText }}</button>
         </form>
+        @elseif($btnLink)
+            <a href="{{ $btnLink}}" class="btn btn-primary" >{{ $btnText }}</a>
+        @endif
         @endsection
     @endcomponent
- 
 @endsection

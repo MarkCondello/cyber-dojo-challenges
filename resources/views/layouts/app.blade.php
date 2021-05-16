@@ -38,14 +38,7 @@
 
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ml-auto">
-                        <li class="nav-item dropdown">
-                            <a id="bowlingDropdown" class="nav-link dropdown-toggle" href="#"  role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre
-                            >10 pin bowling</a>
-                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="bowlingDropdown">
-                                <a class="dropdown-item" href="{{ route('game.intro') }}">Create Game</a>
-                                <a class="dropdown-item" href="{{ route('game.list') }} ">Past Games</a>
-                            </div>
-                        </li>
+    
                         <!-- Authentication Links -->
                         @guest
                             <li class="nav-item">
@@ -57,6 +50,16 @@
                                 </li>
                             @endif
                         @else
+
+                            <li class="nav-item dropdown">
+                                <a id="bowlingDropdown" class="nav-link dropdown-toggle" href="#"  role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre
+                                >10 pin bowling</a>
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="bowlingDropdown">
+                                    <a class="dropdown-item" href="{{ route('game.intro') }}">Create Game</a>
+                                    <a class="dropdown-item" href="{{ route('game.list') }} ">Past Games</a>
+                                </div>
+                            </li>
+
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                                     {{ Auth::user()->name }}
