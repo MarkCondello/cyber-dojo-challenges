@@ -17,7 +17,9 @@ class TenPinBowlingService {
         $prevFrameNumber = $frame->frame_number - 1;
         $prevFrame = $line->getFrameByNumber( $prevFrameNumber );
         if(isset($prevFrame)){
+
             if( $prevFrame->isSpare() ){
+                // ISSPARE NOT WORKING PROPERLY
                 $prevFrame->spare_caryover = $frame->ball_1;
                 $prevFrame->total += $frame->ball_1;
                 $prevFrame->save();
@@ -25,19 +27,20 @@ class TenPinBowlingService {
             
             if( $prevFrame->isStrike() ){
                 $prevFrame->strike_caryover = $frame->ball_1;
-                $prevFrame->total += $frame->ball_1;
+                $prevFrame->total += $prevFrame->strike_caryover;
                 $prevFrame->save();
             }
         }
 
         $beforePrevFrameNumber = $frame->frame_number - 2;
         $beforePrevFrame = $line->getFrameByNumber( $beforePrevFrameNumber );
-        if(isset($beforePrevFrame) && $beforePrevFrame->strike === 1 && $prevFrame->strike === 1){
+        if(isset($beforePrevFrame) && $beforePrevFrame->isStrike() && $prevFrame->isStrike()){
+           
             $beforePrevFrame->strike_caryover += $frame->ball_1;
             $beforePrevFrame->total += $frame->ball_1;
+
             $beforePrevFrame->save();
         }
- 
         //check if game is completed
         if($line->currentFrame() === 12 && !$prevFrame->isStrike() || $line->currentFrame() > 12){
             $line->total_score = $line->getTotal();

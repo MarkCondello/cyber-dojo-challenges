@@ -26,7 +26,11 @@ class Frames extends Model
 
     public function isSpare():bool
     {
-        return $this->ball_1 + $this->ball_2 === 10;
+        if($this->isStrike()){
+            return false;
+        } else {
+            return $this->ball_1 + $this->ball_2 === 10;
+        }
     }
 
     public function attemptMessage(int $total):string
