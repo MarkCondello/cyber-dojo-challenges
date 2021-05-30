@@ -68,4 +68,4 @@ https://www.thebowlinguniverse.com/blogs/guides-and-tips/how-to-keep-score-in-bo
 
 ##User
 Create a new user with this tinker factory:
-``` App\Models\User::factory()->count(1)->create();```# cyber-dojo-challenges
+``` App\Models\User::factory()->count(1)->create();``` 

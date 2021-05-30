@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="{{ asset('js/app.js') }}" defer></script>
 
         <title>Laravel</title>
 
@@ -127,6 +128,22 @@
                     </div>
                 </div>
             </div>
+        </div>
+        <div id="app">
+            <!-- <example-component></example-component> -->
+            @php 
+            $players= [
+                    (object)[
+                        "name" => "white",
+                        "hand" => [],
+                    ],
+                    (object)[
+                        "name" => "black",
+                        "hand" => [],
+                    ],
+                ];
+            @endphp
+            <poker-hands :players='{{ json_encode($players) }}'></poker-hands>
         </div>
     </body>
 </html>
