@@ -2018,6 +2018,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_0__);
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -2030,13 +2032,75 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToAr
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
+
 var suits = ["H", "D", "C", "S"],
     cards = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"],
     deck = suits.map(function (suit) {
   return cards.map(function (card) {
     return suit + card;
   });
-}).flat();
+}).flat(); //  Helpers
+
+var getCardsValues = function getCardsValues(cardsArr) {
+  var cardItemsWithValues = [];
+  cardsArr.forEach(function (card) {
+    var cardValue = card[1];
+
+    if (isNaN(cardValue)) {
+      switch (cardValue) {
+        // change the JQKA to be numbers to sort against more easily
+        case "J":
+          cardItemsWithValues.push({
+            value: 11,
+            card: card
+          });
+          break;
+
+        case "Q":
+          cardItemsWithValues.push({
+            value: 12,
+            card: card
+          });
+          break;
+
+        case "K":
+          cardItemsWithValues.push({
+            value: 13,
+            card: card
+          });
+          break;
+
+        case "A":
+          cardItemsWithValues.push({
+            value: 14,
+            card: card
+          });
+          break;
+      }
+    } else {
+      cardItemsWithValues.push({
+        value: parseInt(cardValue),
+        card: card
+      });
+    }
+  });
+  return cardItemsWithValues;
+}; // helper for 4 and 3 of a kind and flushes
+
+
+var getCardMatches = function getCardMatches(cardsArr, index) {
+  var matches = [true],
+      //first item is always a match
+  cardValue = cardsArr.splice(0, 1)[0];
+  cardsArr.forEach(function (card) {
+    console.log(card, cardValue);
+
+    if (card[index] === cardValue[index]) {
+      matches.push(true);
+    }
+  });
+  return matches;
+};
 
 var pairsCheck = function pairsCheck(playersCards) {
   var pairs = [],
@@ -2059,52 +2123,19 @@ var pairsCheck = function pairsCheck(playersCards) {
     });
   });
   return pairs.length;
-}; // let pairsCheck = (playersCards)=> {
-//     let cards = [...playersCards];
-//     let check = cards.map((card, index) =>  {
-//         let cardValue = card[1];
-//         return cards.map(key => {
-//             if(key !== card && key[1] === cardValue){
-//                 console.log(key , card);
-//                 cards.splice(index, 1); //remove the card from the list
-//                 return "pair";
-//             }
-//             console.log("cards length: ", cards.length)
-//         });
-//      }).flat().filter(item => item === "pair");
-//     return check;
-// }
-// let playersCards  = [ "D9", "S9", "H4", "CK", "C9"];
-// var pairs = pairsCheck(playersCards);
-//  console.log({pairs, playersCards});
-// helper for 4 and 3 of a kind and flushes
-
-
-var checkHandCardsByCardIndex = function checkHandCardsByCardIndex(cardsArr, index) {
-  var matches = [true],
-      //first item is always a match
-  cardValue = cardsArr.splice(0, 1)[0];
-  cardsArr.forEach(function (card) {
-    console.log(card, cardValue);
-
-    if (card[index] === cardValue[index]) {
-      matches.push(true);
-    }
-  });
-  return matches;
 };
 
 var tripsCheck = function tripsCheck(playersCards) {
   var cards = _toConsumableArray(playersCards),
-      firstRes = checkHandCardsByCardIndex(cards, 1);
+      firstRes = getCardMatches(cards, 1);
 
   if (firstRes.length < 3) {
     console.log("Second Card Loop");
-    var secondRes = checkHandCardsByCardIndex(cards, 1); //if firstRes.length < 4, run check again with the shortened array
+    var secondRes = getCardMatches(cards, 1); //if firstRes.length < 4, run check again with the shortened array
 
     if (secondRes.length < 3) {
       console.log("Third Card Loop");
-      var thirdRes = checkHandCardsByCardIndex(cards, 1); //if firstRes.length < 4, run check again with the shortened array
+      var thirdRes = getCardMatches(cards, 1); //if firstRes.length < 4, run check again with the shortened array
 
       if (thirdRes.length < 3) {
         return false;
@@ -2122,27 +2153,96 @@ var tripsCheck = function tripsCheck(playersCards) {
 // console.log(tripsCheckRes);
 
 
+var straightCheck = function straightCheck(playersCards) {
+  var cards = _toConsumableArray(playersCards),
+      heirarchyOfCards = [],
+      cardItemsWithValues = getCardsValues(cards),
+      itemsSorted = cardItemsWithValues.sort(function (first, second) {
+    return first.value - second.value;
+  }),
+      //order the cards 
+  firstSortedItem = itemsSorted[0],
+      firstSortedItemValue = firstSortedItem.value;
+
+  for (var i = 2; i <= 14; i++) {
+    heirarchyOfCards.push(i);
+  }
+
+  var aceLowStraightRef = [].concat(heirarchyOfCards).splice(0, 4);
+  aceLowStraightRef.push(heirarchyOfCards[heirarchyOfCards.length - 1]);
+  var isAceLowStraight = itemsSorted.filter(function (item, index) {
+    return item.value === aceLowStraightRef[index];
+  }).length === 5;
+
+  if (isAceLowStraight) {
+    // checkForAceBottomStraight
+    return true;
+  } else if (firstSortedItemValue < 11) {
+    //else if check firstSortedItemValue < 11
+    var firstOrderedCard = heirarchyOfCards.find(function (card) {
+      return card === firstSortedItemValue;
+    }),
+        firstOrderedCardIndex = heirarchyOfCards.indexOf(firstOrderedCard),
+        splicedHeirarchyOfCardsFromFirstCardIndex = [].concat(heirarchyOfCards).splice(firstOrderedCardIndex, 5),
+        isAStraight = itemsSorted.filter(function (item, index) {
+      return item.value === splicedHeirarchyOfCardsFromFirstCardIndex[index];
+    }).length === 5;
+
+    if (isAStraight) {
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    return false;
+  }
+};
+
+var playersCards = ["SJ", "HJ", "CA", "HK", "DA"];
+var straightCheckRes = straightCheck(playersCards);
+console.log(straightCheckRes);
+
 var flushCheck = function flushCheck(playersCards) {
   var cards = _toConsumableArray(playersCards);
 
-  if (checkHandCardsByCardIndex(cards, 0).length === 5) {
+  if (getCardMatches(cards, 0).length === 5) {
     return true; //firstRes;
   }
 
   return false;
-};
+}; // let playersCards  = [ "D2", "D3", "DK", "D6", "DA"];
+// let flushCheckRes = flushCheck(playersCards);
+//  console.log(flushCheckRes);
 
-var playersCards = ["D2", "D3", "DK", "D6", "DA"];
-var flushCheckRes = flushCheck(playersCards);
-console.log(flushCheckRes);
+
+var bookCheck = function bookCheck(playersCards) {
+  var checkDeckForPair = _toConsumableArray(playersCards),
+      has1Pair = pairsCheck(checkDeckForPair),
+      checkDeckForTrips = _toConsumableArray(playersCards),
+      hasTrips = tripsCheck(checkDeckForTrips);
+
+  console.log({
+    hasTrips: hasTrips,
+    has1Pair: has1Pair
+  });
+
+  if (hasTrips && has1Pair) {
+    return true;
+  }
+
+  return false;
+}; //  let playersCards  = [ "D2", "H2", "S2", "D6", "S6"];
+//  let bookCheckRes = bookCheck(playersCards);
+//  console.log(bookCheckRes);
+
 
 var quadsCheck = function quadsCheck(playersCards) {
   var cards = _toConsumableArray(playersCards),
-      firstRes = checkHandCardsByCardIndex(cards, 1);
+      firstRes = getCardMatches(cards, 1);
 
   if (firstRes.length < 4) {
     console.log("Second Card Loop");
-    var secondRes = checkHandCardsByCardIndex(cards, 1); //if firstRes.length < 4, run check again with the shortened array
+    var secondRes = getCardMatches(cards, 1); //if firstRes.length < 4, run check again with the shortened array
 
     if (secondRes.length < 4) {
       return false;
@@ -51288,6 +51388,18 @@ var index = {
 /******/ 				}
 /******/ 			}
 /******/ 			return result;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__webpack_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__webpack_require__.d(getter, { a: getter });
+/******/ 			return getter;
 /******/ 		};
 /******/ 	})();
 /******/ 	

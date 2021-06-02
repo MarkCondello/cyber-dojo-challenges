@@ -10,8 +10,10 @@ high card
 1 pair DONE
 2 pairs DONE
 3 of a kind DONE
-straight
+straight DONE
 flush DONE
-full house
+full house DONE
 4 of a kind DONE
 royal flush
+
+If players have the same hand, we need a check for higher value.
