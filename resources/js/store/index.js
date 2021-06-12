@@ -1,48 +1,61 @@
+import { forEach } from "lodash";
 import Vue from "vue";
 import Vuex from 'vuex';
- import deck from "../service/PokerHandsService.js";
-
+import {deck, getHandValue} from "../service/PokerHands";
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
     state: {
-        deck ,
+        deck,
+        players: [],
     },
     mutations: {
         REMOVE_CARD(state, cardIndex){
-            // console.log("Reached remove card", {cardIndex})
             state.deck.splice(cardIndex, 1);
         },
+        SET_PLAYERS(state, players){
+            state.players = players;
+        },
+        SET_PLAYERS_CARD(state, {playerId, card}){
+            state.players[playerId].hand.push(card);
+        }
     },
     actions: {
+        addPlayers({commit}, {players}){
+            commit("SET_PLAYERS", players);
+        },
         dealCards(
-            { commit, getters },
-            { players }
+            { state, commit, getters },
         ){
-            let i = 0,
-            playersCards = [];
-            for(let j = 0; j < players; j++) {
-                playersCards.push([]);
-            }
+            let i = 0;
             while(i < 5){
-                for(let j = 0; j < players; j++) {
-
+                for(let j = 0; j < state.players.length; j++) {
                     let cardIndex = getters.randomCardIndex,
                     card = getters.getCard(cardIndex);
-
                     commit("REMOVE_CARD", cardIndex);
-                    playersCards[j].push(card);
+                    commit("SET_PLAYERS_CARD", {playerId: j, card});
                 }
                 i++;
             }
-            console.log( { playersCards})
-            return playersCards;
+        },
+        winningHand({state},
+            ){
+             let results= [];
+
+            state.players.forEach(player=>{
+                //console.log(player.hand)
+                let val = new getHandValue(player.hand);
+                console.log(val)
+                //results.push();
+            });
+
+            console.log({results})
         }
+
     },
     getters: {
         remainingCardsCount: state=>{
-            //  console.log("deck length", state.deck.length)
             return state.deck.length;
         },
         randomCardIndex: (state, getters) => {
@@ -50,6 +63,7 @@ export default new Vuex.Store({
         },
         getCard: state => index => {
             return state.deck[index];
-        }
+        },
+    
     },
 })

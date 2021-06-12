@@ -1895,24 +1895,44 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Poke-Hands",
   props: {
-    players: {
+    playerItems: {
       type: Array,
       required: true
     }
   },
-  state: function state() {
-    return {
-      players: this.players
-    };
+  created: function created() {
+    this.addPlayers({
+      players: this.playerItems
+    });
   },
-  // created: {
-  // },
-  computed: _objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapState)(['deck'])),
-  methods: _objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapActions)(['dealCards']))
+  computed: _objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapState)(['players'])),
+  methods: _objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapActions)(['dealCards', 'addPlayers', 'winningHand'])), {}, {
+    //...mapGetters(['winningHand']),
+    handleGetWinner: function handleGetWinner() {
+      //ToDo: create a action to getWinningHand
+      this.winningHand();
+    }
+  })
 });
 
 /***/ }),
@@ -2007,19 +2027,125 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 /***/ }),
 
-/***/ "./resources/js/service/PokerHandsService.js":
-/*!***************************************************!*\
-  !*** ./resources/js/service/PokerHandsService.js ***!
-  \***************************************************/
+/***/ "./resources/js/helpers/pokerHandHelpers.js":
+/*!**************************************************!*\
+  !*** ./resources/js/helpers/pokerHandHelpers.js ***!
+  \**************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */   "helpers": () => (/* binding */ helpers)
 /* harmony export */ });
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_0__);
+var helpers = {
+  //  Helpers Start
+  pairsCheck: function pairsCheck() {
+    var pairs = [];
+    cards.forEach(function (card, index) {
+      var cardValue = card[1];
+      cards.forEach(function (key) {
+        if (key !== card && key[1] === cardValue) {
+          console.log({
+            key: key,
+            card: card
+          });
+          cards.splice(index, 1); //remove the card from the list
+
+          pairs.push("pair");
+        }
+
+        console.log("cards length: ", cards.length);
+      });
+    });
+    return pairs.length;
+  },
+  getCardsValues: function getCardsValues(cardsArr) {
+    var cardItemsWithValues = [];
+    cardsArr.forEach(function (card) {
+      var cardValue = card[1];
+
+      if (cardValue === "1") {
+        //check for 10 which is the exception because it has 2 characters for its value
+        cardItemsWithValues.push({
+          value: 10,
+          card: card
+        });
+      } else if (isNaN(cardValue)) {
+        switch (cardValue) {
+          // change the JQKA to be numbers to sort against more easily
+          case "J":
+            cardItemsWithValues.push({
+              value: 11,
+              card: card
+            });
+            break;
+
+          case "Q":
+            cardItemsWithValues.push({
+              value: 12,
+              card: card
+            });
+            break;
+
+          case "K":
+            cardItemsWithValues.push({
+              value: 13,
+              card: card
+            });
+            break;
+
+          case "A":
+            cardItemsWithValues.push({
+              value: 14,
+              card: card
+            });
+            break;
+        }
+      } else {
+        cardItemsWithValues.push({
+          value: parseInt(cardValue),
+          card: card
+        });
+      }
+    });
+    return cardItemsWithValues;
+  },
+  // helper for 4 and 3 of a kind and flushes
+  getCardMatches: function getCardMatches(cardsArr, index) {
+    var matches = [true],
+        //first item is always a match
+    cardValue = cardsArr.splice(0, 1)[0];
+    cardsArr.forEach(function (card) {
+      console.log(card, cardValue);
+
+      if (card[index] === cardValue[index]) {
+        matches.push(true);
+      }
+    });
+    return matches;
+  },
+  sortCardsByValues: function sortCardsByValues(cards) {
+    return this.getCardsValues(cards).sort(function (first, second) {
+      return first.value - second.value;
+    });
+  }
+};
+
+/***/ }),
+
+/***/ "./resources/js/helpers/pokerHandsHandChecks.js":
+/*!******************************************************!*\
+  !*** ./resources/js/helpers/pokerHandsHandChecks.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ HandChecks)
+/* harmony export */ });
+/* harmony import */ var _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./pokerHandHelpers */ "./resources/js/helpers/pokerHandHelpers.js");
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -2032,232 +2158,374 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToAr
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+ //ToDo: Need to know the high card for comparison of players with the same hand type
+
+var HandChecks = /*#__PURE__*/function () {
+  function HandChecks() {
+    _classCallCheck(this, HandChecks);
+  }
+
+  _createClass(HandChecks, [{
+    key: "singlePair",
+    value: // constructor(hand){
+    //     this.playersCards = hand;
+    // }
+    function singlePair() {
+      var cards = _toConsumableArray(this.playersCards);
+
+      return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.pairsCheck(cards) === 1;
+    }
+  }, {
+    key: "twoPair",
+    value: function twoPair() {
+      var cards = _toConsumableArray(this.playersCards);
+
+      return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.pairsCheck(cards) === 2;
+    }
+  }, {
+    key: "tripsCheck",
+    value: function tripsCheck() {
+      var cards = _toConsumableArray(this.playersCards),
+          firstRes = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardMatches(cards, 1);
+
+      console.log("First Card Loop", {
+        cards: cards
+      });
+
+      if (firstRes.length < 3) {
+        console.log("Second Card Loop", {
+          cards: cards
+        });
+        var secondRes = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardMatches(cards, 1); //if firstRes.length < 4, run check again with the shortened array
+
+        if (secondRes.length < 3) {
+          console.log("Third Card Loop", {
+            cards: cards
+          });
+          var thirdRes = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardMatches(cards, 1); //if firstRes.length < 4, run check again with the shortened array
+
+          if (thirdRes.length < 3) {
+            return false;
+          } else {
+            return true; //thirdRes;  
+          }
+        } else {
+          return true; //secondRes; 
+        }
+      } else {
+        return true; //firstRes;  
+      }
+    } // let playersCards  = [ "D2", "S3", "H7", "C1", "H2"];
+    // let tripsCheckRes = tripsCheck(playersCards);
+    // console.log(tripsCheckRes);
+
+  }, {
+    key: "straightCheck",
+    value: function straightCheck() {
+      var cards = _toConsumableArray(this.playersCards),
+          heirarchyOfCards = [],
+          itemsSorted = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(cards),
+          //order the cards 
+      firstSortedItem = itemsSorted[0],
+          firstSortedItemValue = firstSortedItem.value;
+
+      for (var i = 2; i <= 14; i++) {
+        heirarchyOfCards.push(i);
+      }
+
+      var aceLowStraightRef = [].concat(heirarchyOfCards).splice(0, 4);
+      aceLowStraightRef.push(heirarchyOfCards[heirarchyOfCards.length - 1]);
+      var isAceLowStraight = itemsSorted.filter(function (item, index) {
+        return item.value === aceLowStraightRef[index];
+      }).length === 5;
+
+      if (isAceLowStraight) {
+        // checkForAceBottomStraight
+        return true;
+      } else if (firstSortedItemValue < 11) {
+        //else if check firstSortedItemValue < 11
+        var firstOrderedCard = heirarchyOfCards.find(function (card) {
+          return card === firstSortedItemValue;
+        }),
+            firstOrderedCardIndex = heirarchyOfCards.indexOf(firstOrderedCard),
+            splicedHeirarchyOfCardsFromFirstCardIndex = [].concat(heirarchyOfCards).splice(firstOrderedCardIndex, 5),
+            isAStraight = itemsSorted.filter(function (item, index) {
+          return item.value === splicedHeirarchyOfCardsFromFirstCardIndex[index];
+        }).length === 5; // console.log({isAStraight, itemsSorted, splicedHeirarchyOfCardsFromFirstCardIndex, })
+
+        if (isAStraight) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } // let playersCards  = [ "SJ", "HJ", "CA", "HK", "DA"];
+    // let straightCheckRes = straightCheck(playersCards);
+    // console.log(straightCheckRes);
+
+  }, {
+    key: "flushCheck",
+    value: function flushCheck() {
+      var cards = _toConsumableArray(this.playersCards);
+
+      if (_pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardMatches(cards, 0).length === 5) {
+        return true; //firstRes;
+      }
+
+      return false;
+    } // let playersCards  = [ "D2", "D3", "DK", "D6", "DA"];
+    // let flushCheckRes = flushCheck(playersCards);
+    //  console.log(flushCheckRes);
+
+  }, {
+    key: "bookCheck",
+    value: function bookCheck() {
+      var checkDeckForPair = _toConsumableArray(this.playersCards),
+          has1Pair = this.singlePair(checkDeckForPair),
+          checkDeckForTrips = _toConsumableArray(playersCards),
+          hasTrips = this.tripsCheck(checkDeckForTrips); //console.log({hasTrips, has1Pair});
+
+
+      if (hasTrips && has1Pair) {
+        return true;
+      }
+
+      return false;
+    } //  let playersCards  = [ "D2", "H2", "S2", "D6", "S6"];
+    //  let bookCheckRes = bookCheck(playersCards);
+    //  console.log(bookCheckRes);
+    //ToDo: Fix bug = Cards is not defined
+
+  }, {
+    key: "quadsCheck",
+    value: function quadsCheck() {
+      var cards = _toConsumableArray(this.playersCards),
+          firstRes = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardMatches(cards, 1);
+
+      if (firstRes.length < 4) {
+        var secondRes = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardMatches(cards, 1); //if firstRes.length < 4, run check again with the shortened array
+
+        console.log("Second Card Loop", {
+          cards: cards,
+          secondRes: secondRes
+        });
+
+        if (secondRes.length < 4) {
+          return false;
+        } else {
+          return true; //return secondRes;
+        }
+      } else {
+        return true; // return firstRes;
+      }
+    } // let playersCards  = [ "D2", "S1", "H1", "C1", "D1"];
+    // let quadsCheckRes = quadsCheck(playersCards);
+    // console.log(quadsCheckRes);
+
+  }, {
+    key: "straightFlushCheck",
+    value: function straightFlushCheck() {
+      // console.log(straightCheck(this.playersCards), flushCheck(this.playersCards))
+      if (this.straightCheck(this.playersCards) && this.flushCheck(this.playersCards)) {
+        return true;
+      }
+
+      return false;
+    } // let playersCards  = [ "H10", "HJ", "HQ", "HK", "HA"];
+    // let straightFlushCheckRes = straightFlushCheck(playersCards);
+    // console.log(straightFlushCheckRes);
+
+  }, {
+    key: "royalFlushCheck",
+    value: function royalFlushCheck() {
+      // console.log("reached royal flush check")
+      var firstCardsValue = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(_toConsumableArray(this.playersCards))[0].value;
+
+      if (firstCardsValue === 10 && this.straightCheck(this.playersCards) && this.flushCheck(this.playersCards)) {
+        return true;
+      }
+
+      return false;
+    } // let playersCards = [ "H10", "HJ", "HQ", "HK", "HA"];
+    // let royalFlushCheckRes = royalFlushCheck(playersCards);
+    // console.log(royalFlushCheckRes);
+
+  }]);
+
+  return HandChecks;
+}();
+
+
+
+/***/ }),
+
+/***/ "./resources/js/service/PokerHands.js":
+/*!********************************************!*\
+  !*** ./resources/js/service/PokerHands.js ***!
+  \********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "getHandValue": () => (/* binding */ getHandValue),
+/* harmony export */   "deck": () => (/* binding */ deck)
+/* harmony export */ });
+/* harmony import */ var _helpers_pokerHandsHandChecks__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../helpers/pokerHandsHandChecks */ "./resources/js/helpers/pokerHandsHandChecks.js");
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+
+var getHandValue = /*#__PURE__*/function (_handChecks) {
+  _inherits(getHandValue, _handChecks);
+
+  var _super = _createSuper(getHandValue);
+
+  function getHandValue(hand) {
+    var _this;
+
+    _classCallCheck(this, getHandValue);
+
+    _this = _super.call(this);
+    _this.playersCards = hand;
+    _this.rank = {
+      value: null,
+      type: null
+    };
+
+    _this.checkValue();
+
+    return _this;
+  }
+
+  _createClass(getHandValue, [{
+    key: "updateRank",
+    value: function updateRank(_ref) {
+      var rankObj = _ref.rankObj;
+      this.rank = _objectSpread(_objectSpread({}, this.rank), {}, {
+        rankObj: rankObj
+      });
+    }
+  }, {
+    key: "checkValue",
+    value: function checkValue() {
+      switch (this.playersCards) {
+        case this.royalFlushCheck(this.playersCards):
+          this.updateRank({
+            value: 0,
+            type: "Royal Flush"
+          });
+          break;
+
+        case this.straightFlushCheck(this.playersCards):
+          this.updateRank({
+            value: 1,
+            type: "Straight Flush"
+          });
+          break;
+
+        case this.quadsCheck(this.playersCards):
+          this.updateRank({
+            value: 2,
+            type: "Four of a kind"
+          });
+          break;
+
+        case this.bookCheck(this.playersCards):
+          this.updateRank({
+            value: 3,
+            type: "Full House"
+          });
+          break;
+
+        case this.flushCheck(this.playersCards):
+          this.updateRank({
+            value: 4,
+            type: "Flush"
+          });
+          break;
+
+        case this.straightCheck(this.playersCards):
+          this.updateRank({
+            value: 5,
+            type: "Straight"
+          });
+          break;
+
+        case this.tripsCheck(this.playersCards):
+          this.updateRank({
+            value: 6,
+            type: "Three of a kind"
+          });
+          break;
+
+        case this.twoPair(this.playersCards):
+          this.updateRank({
+            value: 7,
+            type: "Two pairs"
+          });
+          break;
+
+        case this.singlePair(this.playersCards):
+          this.updateRank({
+            value: 8,
+            type: "One pair"
+          });
+          break;
+
+        default:
+          this.updateRank({
+            value: 9,
+            type: ""
+          });
+      }
+
+      return this.rank;
+    }
+  }]);
+
+  return getHandValue;
+}(_helpers_pokerHandsHandChecks__WEBPACK_IMPORTED_MODULE_0__.default);
 var suits = ["H", "D", "C", "S"],
-    cards = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"],
-    deck = suits.map(function (suit) {
+    cards = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
+var deck = suits.map(function (suit) {
   return cards.map(function (card) {
     return suit + card;
   });
-}).flat(); //  Helpers
-
-var getCardsValues = function getCardsValues(cardsArr) {
-  var cardItemsWithValues = [];
-  cardsArr.forEach(function (card) {
-    var cardValue = card[1];
-
-    if (isNaN(cardValue)) {
-      switch (cardValue) {
-        // change the JQKA to be numbers to sort against more easily
-        case "J":
-          cardItemsWithValues.push({
-            value: 11,
-            card: card
-          });
-          break;
-
-        case "Q":
-          cardItemsWithValues.push({
-            value: 12,
-            card: card
-          });
-          break;
-
-        case "K":
-          cardItemsWithValues.push({
-            value: 13,
-            card: card
-          });
-          break;
-
-        case "A":
-          cardItemsWithValues.push({
-            value: 14,
-            card: card
-          });
-          break;
-      }
-    } else {
-      cardItemsWithValues.push({
-        value: parseInt(cardValue),
-        card: card
-      });
-    }
-  });
-  return cardItemsWithValues;
-}; // helper for 4 and 3 of a kind and flushes
-
-
-var getCardMatches = function getCardMatches(cardsArr, index) {
-  var matches = [true],
-      //first item is always a match
-  cardValue = cardsArr.splice(0, 1)[0];
-  cardsArr.forEach(function (card) {
-    console.log(card, cardValue);
-
-    if (card[index] === cardValue[index]) {
-      matches.push(true);
-    }
-  });
-  return matches;
-};
-
-var pairsCheck = function pairsCheck(playersCards) {
-  var pairs = [],
-      cards = _toConsumableArray(playersCards);
-
-  cards.forEach(function (card, index) {
-    var cardValue = card[1];
-    cards.forEach(function (key) {
-      if (key !== card && key[1] === cardValue) {
-        console.log({
-          key: key,
-          card: card
-        });
-        cards.splice(index, 1); //remove the card from the list
-
-        pairs.push("pair");
-      }
-
-      console.log("cards length: ", cards.length);
-    });
-  });
-  return pairs.length;
-};
-
-var tripsCheck = function tripsCheck(playersCards) {
-  var cards = _toConsumableArray(playersCards),
-      firstRes = getCardMatches(cards, 1);
-
-  if (firstRes.length < 3) {
-    console.log("Second Card Loop");
-    var secondRes = getCardMatches(cards, 1); //if firstRes.length < 4, run check again with the shortened array
-
-    if (secondRes.length < 3) {
-      console.log("Third Card Loop");
-      var thirdRes = getCardMatches(cards, 1); //if firstRes.length < 4, run check again with the shortened array
-
-      if (thirdRes.length < 3) {
-        return false;
-      } else {
-        return true; //thirdRes;  
-      }
-    } else {
-      return true; //secondRes; 
-    }
-  } else {
-    return true; //firstRes;  
-  }
-}; // let playersCards  = [ "D2", "S3", "H7", "C1", "H2"];
-// let tripsCheckRes = tripsCheck(playersCards);
-// console.log(tripsCheckRes);
-
-
-var straightCheck = function straightCheck(playersCards) {
-  var cards = _toConsumableArray(playersCards),
-      heirarchyOfCards = [],
-      cardItemsWithValues = getCardsValues(cards),
-      itemsSorted = cardItemsWithValues.sort(function (first, second) {
-    return first.value - second.value;
-  }),
-      //order the cards 
-  firstSortedItem = itemsSorted[0],
-      firstSortedItemValue = firstSortedItem.value;
-
-  for (var i = 2; i <= 14; i++) {
-    heirarchyOfCards.push(i);
-  }
-
-  var aceLowStraightRef = [].concat(heirarchyOfCards).splice(0, 4);
-  aceLowStraightRef.push(heirarchyOfCards[heirarchyOfCards.length - 1]);
-  var isAceLowStraight = itemsSorted.filter(function (item, index) {
-    return item.value === aceLowStraightRef[index];
-  }).length === 5;
-
-  if (isAceLowStraight) {
-    // checkForAceBottomStraight
-    return true;
-  } else if (firstSortedItemValue < 11) {
-    //else if check firstSortedItemValue < 11
-    var firstOrderedCard = heirarchyOfCards.find(function (card) {
-      return card === firstSortedItemValue;
-    }),
-        firstOrderedCardIndex = heirarchyOfCards.indexOf(firstOrderedCard),
-        splicedHeirarchyOfCardsFromFirstCardIndex = [].concat(heirarchyOfCards).splice(firstOrderedCardIndex, 5),
-        isAStraight = itemsSorted.filter(function (item, index) {
-      return item.value === splicedHeirarchyOfCardsFromFirstCardIndex[index];
-    }).length === 5;
-
-    if (isAStraight) {
-      return true;
-    } else {
-      return false;
-    }
-  } else {
-    return false;
-  }
-};
-
-var playersCards = ["SJ", "HJ", "CA", "HK", "DA"];
-var straightCheckRes = straightCheck(playersCards);
-console.log(straightCheckRes);
-
-var flushCheck = function flushCheck(playersCards) {
-  var cards = _toConsumableArray(playersCards);
-
-  if (getCardMatches(cards, 0).length === 5) {
-    return true; //firstRes;
-  }
-
-  return false;
-}; // let playersCards  = [ "D2", "D3", "DK", "D6", "DA"];
-// let flushCheckRes = flushCheck(playersCards);
-//  console.log(flushCheckRes);
-
-
-var bookCheck = function bookCheck(playersCards) {
-  var checkDeckForPair = _toConsumableArray(playersCards),
-      has1Pair = pairsCheck(checkDeckForPair),
-      checkDeckForTrips = _toConsumableArray(playersCards),
-      hasTrips = tripsCheck(checkDeckForTrips);
-
-  console.log({
-    hasTrips: hasTrips,
-    has1Pair: has1Pair
-  });
-
-  if (hasTrips && has1Pair) {
-    return true;
-  }
-
-  return false;
-}; //  let playersCards  = [ "D2", "H2", "S2", "D6", "S6"];
-//  let bookCheckRes = bookCheck(playersCards);
-//  console.log(bookCheckRes);
-
-
-var quadsCheck = function quadsCheck(playersCards) {
-  var cards = _toConsumableArray(playersCards),
-      firstRes = getCardMatches(cards, 1);
-
-  if (firstRes.length < 4) {
-    console.log("Second Card Loop");
-    var secondRes = getCardMatches(cards, 1); //if firstRes.length < 4, run check again with the shortened array
-
-    if (secondRes.length < 4) {
-      return false;
-    } else {
-      return true; //return secondRes;
-    }
-  } else {
-    return true; // return firstRes;
-  }
-}; // let playersCards  = [ "D2", "S1", "H1", "C1", "D1"];
-// let quadsCheckRes = quadsCheck(playersCards);
-// console.log(quadsCheckRes);
-
-
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (deck);
+}).flat();
 
 /***/ }),
 
@@ -2272,56 +2540,75 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
-/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
-/* harmony import */ var _service_PokerHandsService_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../service/PokerHandsService.js */ "./resources/js/service/PokerHandsService.js");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+/* harmony import */ var _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../service/PokerHands */ "./resources/js/service/PokerHands.js");
 
 
 
-vue__WEBPACK_IMPORTED_MODULE_1__.default.use(vuex__WEBPACK_IMPORTED_MODULE_2__.default);
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new vuex__WEBPACK_IMPORTED_MODULE_2__.default.Store({
+
+vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.default);
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new vuex__WEBPACK_IMPORTED_MODULE_3__.default.Store({
   state: {
-    deck: _service_PokerHandsService_js__WEBPACK_IMPORTED_MODULE_0__.default
+    deck: _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.deck,
+    players: []
   },
   mutations: {
     REMOVE_CARD: function REMOVE_CARD(state, cardIndex) {
-      // console.log("Reached remove card", {cardIndex})
       state.deck.splice(cardIndex, 1);
+    },
+    SET_PLAYERS: function SET_PLAYERS(state, players) {
+      state.players = players;
+    },
+    SET_PLAYERS_CARD: function SET_PLAYERS_CARD(state, _ref) {
+      var playerId = _ref.playerId,
+          card = _ref.card;
+      state.players[playerId].hand.push(card);
     }
   },
   actions: {
-    dealCards: function dealCards(_ref, _ref2) {
-      var commit = _ref.commit,
-          getters = _ref.getters;
-      var players = _ref2.players;
-      var i = 0,
-          playersCards = [];
-
-      for (var j = 0; j < players; j++) {
-        playersCards.push([]);
-      }
+    addPlayers: function addPlayers(_ref2, _ref3) {
+      var commit = _ref2.commit;
+      var players = _ref3.players;
+      commit("SET_PLAYERS", players);
+    },
+    dealCards: function dealCards(_ref4) {
+      var state = _ref4.state,
+          commit = _ref4.commit,
+          getters = _ref4.getters;
+      var i = 0;
 
       while (i < 5) {
-        for (var _j = 0; _j < players; _j++) {
+        for (var j = 0; j < state.players.length; j++) {
           var cardIndex = getters.randomCardIndex,
               card = getters.getCard(cardIndex);
           commit("REMOVE_CARD", cardIndex);
-
-          playersCards[_j].push(card);
+          commit("SET_PLAYERS_CARD", {
+            playerId: j,
+            card: card
+          });
         }
 
         i++;
       }
-
-      console.log({
-        playersCards: playersCards
+    },
+    winningHand: function winningHand(_ref5) {
+      var state = _ref5.state;
+      var results = [];
+      state.players.forEach(function (player) {
+        //console.log(player.hand)
+        var val = new _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.getHandValue(player.hand);
+        console.log(val); //results.push();
       });
-      return playersCards;
+      console.log({
+        results: results
+      });
     }
   },
   getters: {
     remainingCardsCount: function remainingCardsCount(state) {
-      //  console.log("deck length", state.deck.length)
       return state.deck.length;
     },
     randomCardIndex: function randomCardIndex(state, getters) {
@@ -6775,6 +7062,106 @@ vue__WEBPACK_IMPORTED_MODULE_1__.default.use(vuex__WEBPACK_IMPORTED_MODULE_2__.d
 })));
 //# sourceMappingURL=bootstrap.js.map
 
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/PokerHands.vue?vue&type=style&index=0&lang=css&":
+/*!*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/PokerHands.vue?vue&type=style&index=0&lang=css& ***!
+  \*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0__);
+// Imports
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, "\n.container {\n    padding: 25px;\n    display: grid;\n    grid-template-columns: 1fr 1fr;\n    grid-gap: 50px;\n}\n", ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/runtime/api.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/css-loader/dist/runtime/api.js ***!
+  \*****************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+/*
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra
+*/
+// css base code, injected by the css-loader
+// eslint-disable-next-line func-names
+module.exports = function (cssWithMappingToString) {
+  var list = []; // return the list of modules as css string
+
+  list.toString = function toString() {
+    return this.map(function (item) {
+      var content = cssWithMappingToString(item);
+
+      if (item[2]) {
+        return "@media ".concat(item[2], " {").concat(content, "}");
+      }
+
+      return content;
+    }).join("");
+  }; // import a list of modules into the list
+  // eslint-disable-next-line func-names
+
+
+  list.i = function (modules, mediaQuery, dedupe) {
+    if (typeof modules === "string") {
+      // eslint-disable-next-line no-param-reassign
+      modules = [[null, modules, ""]];
+    }
+
+    var alreadyImportedModules = {};
+
+    if (dedupe) {
+      for (var i = 0; i < this.length; i++) {
+        // eslint-disable-next-line prefer-destructuring
+        var id = this[i][0];
+
+        if (id != null) {
+          alreadyImportedModules[id] = true;
+        }
+      }
+    }
+
+    for (var _i = 0; _i < modules.length; _i++) {
+      var item = [].concat(modules[_i]);
+
+      if (dedupe && alreadyImportedModules[item[0]]) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+
+      if (mediaQuery) {
+        if (!item[2]) {
+          item[2] = mediaQuery;
+        } else {
+          item[2] = "".concat(mediaQuery, " and ").concat(item[2]);
+        }
+      }
+
+      list.push(item);
+    }
+  };
+
+  return list;
+};
 
 /***/ }),
 
@@ -37772,15 +38159,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _PokerHands_vue_vue_type_template_id_01489496___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./PokerHands.vue?vue&type=template&id=01489496& */ "./resources/js/components/PokerHands.vue?vue&type=template&id=01489496&");
 /* harmony import */ var _PokerHands_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./PokerHands.vue?vue&type=script&lang=js& */ "./resources/js/components/PokerHands.vue?vue&type=script&lang=js&");
-/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+/* harmony import */ var _PokerHands_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./PokerHands.vue?vue&type=style&index=0&lang=css& */ "./resources/js/components/PokerHands.vue?vue&type=style&index=0&lang=css&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
 
 
 
+;
 
 
 /* normalize component */
-;
-var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__.default)(
+
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__.default)(
   _PokerHands_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__.default,
   _PokerHands_vue_vue_type_template_id_01489496___WEBPACK_IMPORTED_MODULE_0__.render,
   _PokerHands_vue_vue_type_template_id_01489496___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
@@ -37864,6 +38253,23 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/components/PokerHands.vue?vue&type=style&index=0&lang=css&":
+/*!*********************************************************************************!*\
+  !*** ./resources/js/components/PokerHands.vue?vue&type=style&index=0&lang=css& ***!
+  \*********************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_2_node_modules_vue_loader_lib_index_js_vue_loader_options_PokerHands_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-style-loader/index.js!../../../node_modules/css-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[1]!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[2]!../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./PokerHands.vue?vue&type=style&index=0&lang=css& */ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/PokerHands.vue?vue&type=style&index=0&lang=css&");
+/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_2_node_modules_vue_loader_lib_index_js_vue_loader_options_PokerHands_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_2_node_modules_vue_loader_lib_index_js_vue_loader_options_PokerHands_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ var __WEBPACK_REEXPORT_OBJECT__ = {};
+/* harmony reexport (unknown) */ for(const __WEBPACK_IMPORT_KEY__ in _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_2_node_modules_vue_loader_lib_index_js_vue_loader_options_PokerHands_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== "default") __WEBPACK_REEXPORT_OBJECT__[__WEBPACK_IMPORT_KEY__] = () => _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_2_node_modules_vue_loader_lib_index_js_vue_loader_options_PokerHands_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__[__WEBPACK_IMPORT_KEY__]
+/* harmony reexport (unknown) */ __webpack_require__.d(__webpack_exports__, __WEBPACK_REEXPORT_OBJECT__);
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e&":
 /*!****************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e& ***!
@@ -37928,23 +38334,72 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [
-    _c("h1", [_vm._v("POKER HANDS")]),
-    _vm._v(" "),
-    _c(
-      "button",
-      {
-        staticStyle: { width: "100%" },
-        on: {
-          click: function($event) {
-            $event.stopPropagation()
-            return _vm.dealCards({ players: _vm.players.length })
-          }
-        }
-      },
-      [_vm._v("Deal")]
-    )
-  ])
+  return _c(
+    "div",
+    [
+      this.players
+        ? [
+            _c("h1", [_vm._v("POKER HANDS")]),
+            _vm._v(" "),
+            _vm.players[0].hand.length
+              ? [
+                  _c(
+                    "button",
+                    {
+                      staticStyle: { width: "100%" },
+                      on: {
+                        click: function($event) {
+                          $event.stopPropagation()
+                          return _vm.handleGetWinner($event)
+                        }
+                      }
+                    },
+                    [_vm._v("Who wins?")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "container" },
+                    _vm._l(this.players, function(player, pid) {
+                      return _c("article", { key: pid }, [
+                        _c("h2", [_vm._v(_vm._s(player.name))]),
+                        _vm._v(" "),
+                        _c(
+                          "ul",
+                          _vm._l(player.hand, function(card, cid) {
+                            return _c("li", { key: pid + cid }, [
+                              _vm._v(
+                                "\n                           " +
+                                  _vm._s(card) +
+                                  "\n                       "
+                              )
+                            ])
+                          }),
+                          0
+                        )
+                      ])
+                    }),
+                    0
+                  )
+                ]
+              : _c(
+                  "button",
+                  {
+                    staticStyle: { width: "100%" },
+                    on: {
+                      click: function($event) {
+                        $event.stopPropagation()
+                        return _vm.dealCards($event)
+                      }
+                    }
+                  },
+                  [_vm._v("Deal")]
+                )
+          ]
+        : _vm._e()
+    ],
+    2
+  )
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -38061,6 +38516,307 @@ function normalizeComponent (
     exports: scriptExports,
     options: options
   }
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/PokerHands.vue?vue&type=style&index=0&lang=css&":
+/*!******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/PokerHands.vue?vue&type=style&index=0&lang=css& ***!
+  \******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(/*! !!../../../node_modules/css-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[1]!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[2]!../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./PokerHands.vue?vue&type=style&index=0&lang=css& */ "./node_modules/css-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-9[0].rules[0].use[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/PokerHands.vue?vue&type=style&index=0&lang=css&");
+if(content.__esModule) content = content.default;
+if(typeof content === 'string') content = [[module.id, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var add = __webpack_require__(/*! !../../../node_modules/vue-style-loader/lib/addStylesClient.js */ "./node_modules/vue-style-loader/lib/addStylesClient.js").default
+var update = add("691f76a6", content, false, {});
+// Hot Module Replacement
+if(false) {}
+
+/***/ }),
+
+/***/ "./node_modules/vue-style-loader/lib/addStylesClient.js":
+/*!**************************************************************!*\
+  !*** ./node_modules/vue-style-loader/lib/addStylesClient.js ***!
+  \**************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ addStylesClient)
+/* harmony export */ });
+/* harmony import */ var _listToStyles__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./listToStyles */ "./node_modules/vue-style-loader/lib/listToStyles.js");
+/*
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra
+  Modified by Evan You @yyx990803
+*/
+
+
+
+var hasDocument = typeof document !== 'undefined'
+
+if (typeof DEBUG !== 'undefined' && DEBUG) {
+  if (!hasDocument) {
+    throw new Error(
+    'vue-style-loader cannot be used in a non-browser environment. ' +
+    "Use { target: 'node' } in your Webpack config to indicate a server-rendering environment."
+  ) }
+}
+
+/*
+type StyleObject = {
+  id: number;
+  parts: Array<StyleObjectPart>
+}
+
+type StyleObjectPart = {
+  css: string;
+  media: string;
+  sourceMap: ?string
+}
+*/
+
+var stylesInDom = {/*
+  [id: number]: {
+    id: number,
+    refs: number,
+    parts: Array<(obj?: StyleObjectPart) => void>
+  }
+*/}
+
+var head = hasDocument && (document.head || document.getElementsByTagName('head')[0])
+var singletonElement = null
+var singletonCounter = 0
+var isProduction = false
+var noop = function () {}
+var options = null
+var ssrIdKey = 'data-vue-ssr-id'
+
+// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+// tags it will allow on a page
+var isOldIE = typeof navigator !== 'undefined' && /msie [6-9]\b/.test(navigator.userAgent.toLowerCase())
+
+function addStylesClient (parentId, list, _isProduction, _options) {
+  isProduction = _isProduction
+
+  options = _options || {}
+
+  var styles = (0,_listToStyles__WEBPACK_IMPORTED_MODULE_0__.default)(parentId, list)
+  addStylesToDom(styles)
+
+  return function update (newList) {
+    var mayRemove = []
+    for (var i = 0; i < styles.length; i++) {
+      var item = styles[i]
+      var domStyle = stylesInDom[item.id]
+      domStyle.refs--
+      mayRemove.push(domStyle)
+    }
+    if (newList) {
+      styles = (0,_listToStyles__WEBPACK_IMPORTED_MODULE_0__.default)(parentId, newList)
+      addStylesToDom(styles)
+    } else {
+      styles = []
+    }
+    for (var i = 0; i < mayRemove.length; i++) {
+      var domStyle = mayRemove[i]
+      if (domStyle.refs === 0) {
+        for (var j = 0; j < domStyle.parts.length; j++) {
+          domStyle.parts[j]()
+        }
+        delete stylesInDom[domStyle.id]
+      }
+    }
+  }
+}
+
+function addStylesToDom (styles /* Array<StyleObject> */) {
+  for (var i = 0; i < styles.length; i++) {
+    var item = styles[i]
+    var domStyle = stylesInDom[item.id]
+    if (domStyle) {
+      domStyle.refs++
+      for (var j = 0; j < domStyle.parts.length; j++) {
+        domStyle.parts[j](item.parts[j])
+      }
+      for (; j < item.parts.length; j++) {
+        domStyle.parts.push(addStyle(item.parts[j]))
+      }
+      if (domStyle.parts.length > item.parts.length) {
+        domStyle.parts.length = item.parts.length
+      }
+    } else {
+      var parts = []
+      for (var j = 0; j < item.parts.length; j++) {
+        parts.push(addStyle(item.parts[j]))
+      }
+      stylesInDom[item.id] = { id: item.id, refs: 1, parts: parts }
+    }
+  }
+}
+
+function createStyleElement () {
+  var styleElement = document.createElement('style')
+  styleElement.type = 'text/css'
+  head.appendChild(styleElement)
+  return styleElement
+}
+
+function addStyle (obj /* StyleObjectPart */) {
+  var update, remove
+  var styleElement = document.querySelector('style[' + ssrIdKey + '~="' + obj.id + '"]')
+
+  if (styleElement) {
+    if (isProduction) {
+      // has SSR styles and in production mode.
+      // simply do nothing.
+      return noop
+    } else {
+      // has SSR styles but in dev mode.
+      // for some reason Chrome can't handle source map in server-rendered
+      // style tags - source maps in <style> only works if the style tag is
+      // created and inserted dynamically. So we remove the server rendered
+      // styles and inject new ones.
+      styleElement.parentNode.removeChild(styleElement)
+    }
+  }
+
+  if (isOldIE) {
+    // use singleton mode for IE9.
+    var styleIndex = singletonCounter++
+    styleElement = singletonElement || (singletonElement = createStyleElement())
+    update = applyToSingletonTag.bind(null, styleElement, styleIndex, false)
+    remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true)
+  } else {
+    // use multi-style-tag mode in all other cases
+    styleElement = createStyleElement()
+    update = applyToTag.bind(null, styleElement)
+    remove = function () {
+      styleElement.parentNode.removeChild(styleElement)
+    }
+  }
+
+  update(obj)
+
+  return function updateStyle (newObj /* StyleObjectPart */) {
+    if (newObj) {
+      if (newObj.css === obj.css &&
+          newObj.media === obj.media &&
+          newObj.sourceMap === obj.sourceMap) {
+        return
+      }
+      update(obj = newObj)
+    } else {
+      remove()
+    }
+  }
+}
+
+var replaceText = (function () {
+  var textStore = []
+
+  return function (index, replacement) {
+    textStore[index] = replacement
+    return textStore.filter(Boolean).join('\n')
+  }
+})()
+
+function applyToSingletonTag (styleElement, index, remove, obj) {
+  var css = remove ? '' : obj.css
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = replaceText(index, css)
+  } else {
+    var cssNode = document.createTextNode(css)
+    var childNodes = styleElement.childNodes
+    if (childNodes[index]) styleElement.removeChild(childNodes[index])
+    if (childNodes.length) {
+      styleElement.insertBefore(cssNode, childNodes[index])
+    } else {
+      styleElement.appendChild(cssNode)
+    }
+  }
+}
+
+function applyToTag (styleElement, obj) {
+  var css = obj.css
+  var media = obj.media
+  var sourceMap = obj.sourceMap
+
+  if (media) {
+    styleElement.setAttribute('media', media)
+  }
+  if (options.ssrId) {
+    styleElement.setAttribute(ssrIdKey, obj.id)
+  }
+
+  if (sourceMap) {
+    // https://developer.chrome.com/devtools/docs/javascript-debugging
+    // this makes source maps inside style tags work properly in Chrome
+    css += '\n/*# sourceURL=' + sourceMap.sources[0] + ' */'
+    // http://stackoverflow.com/a/26603875
+    css += '\n/*# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + ' */'
+  }
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = css
+  } else {
+    while (styleElement.firstChild) {
+      styleElement.removeChild(styleElement.firstChild)
+    }
+    styleElement.appendChild(document.createTextNode(css))
+  }
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-style-loader/lib/listToStyles.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/vue-style-loader/lib/listToStyles.js ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ listToStyles)
+/* harmony export */ });
+/**
+ * Translates the list format produced by css-loader into something
+ * easier to manipulate.
+ */
+function listToStyles (parentId, list) {
+  var styles = []
+  var newStyles = {}
+  for (var i = 0; i < list.length; i++) {
+    var item = list[i]
+    var id = item[0]
+    var css = item[1]
+    var media = item[2]
+    var sourceMap = item[3]
+    var part = {
+      id: parentId + ':' + i,
+      css: css,
+      media: media,
+      sourceMap: sourceMap
+    }
+    if (!newStyles[id]) {
+      styles.push(newStyles[id] = { id: id, parts: [part] })
+    } else {
+      newStyles[id].parts.push(part)
+    }
+  }
+  return styles
 }
 
 

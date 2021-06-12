@@ -14,6 +14,7 @@ straight DONE
 flush DONE
 full house DONE
 4 of a kind DONE
-royal flush
+straight flush DONE
+royal flush DONE
 
 If players have the same hand, we need a check for higher value.
