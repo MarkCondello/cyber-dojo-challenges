@@ -25,7 +25,7 @@
 <script>
 import { mapState, mapGetters, mapActions } from "vuex";
 export default {
-    name: "Poke-Hands",
+    name: "Poker-Hands",
     props: {
         playerItems: {
             type: Array,
@@ -41,7 +41,7 @@ export default {
     },
     methods: {
         ...mapActions(['dealCards', 'addPlayers', 'winningHand']),
-        //...mapGetters(['winningHand']),
+        //...mapGetters([' ']),
         handleGetWinner(){
          //ToDo: create a action to getWinningHand
             this.winningHand()

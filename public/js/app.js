@@ -1834,41 +1834,6 @@ module.exports = {
 
 /***/ }),
 
-/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js&":
-/*!***********************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js& ***!
-  \***********************************************************************************************************************************************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  mounted: function mounted() {
-    console.log('Component mounted.');
-  }
-});
-
-/***/ }),
-
 /***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/PokerHands.vue?vue&type=script&lang=js&":
 /*!*****************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/PokerHands.vue?vue&type=script&lang=js& ***!
@@ -1913,7 +1878,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  name: "Poke-Hands",
+  name: "Poker-Hands",
   props: {
     playerItems: {
       type: Array,
@@ -1927,7 +1892,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   },
   computed: _objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapState)(['players'])),
   methods: _objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapActions)(['dealCards', 'addPlayers', 'winningHand'])), {}, {
-    //...mapGetters(['winningHand']),
+    //...mapGetters([' ']),
     handleGetWinner: function handleGetWinner() {
       //ToDo: create a action to getWinningHand
       this.winningHand();
@@ -1968,7 +1933,6 @@ window.Vue = vue__WEBPACK_IMPORTED_MODULE_1__.default;
 // const files = require.context('./', true, /\.vue$/i)
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 
-vue__WEBPACK_IMPORTED_MODULE_1__.default.component('example-component', __webpack_require__(/*! ./components/ExampleComponent.vue */ "./resources/js/components/ExampleComponent.vue").default);
 vue__WEBPACK_IMPORTED_MODULE_1__.default.component('poker-hands', __webpack_require__(/*! ./components/PokerHands.vue */ "./resources/js/components/PokerHands.vue").default);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -2040,22 +2004,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 var helpers = {
   //  Helpers Start
-  pairsCheck: function pairsCheck() {
+  pairsCheck: function pairsCheck(cards) {
     var pairs = [];
     cards.forEach(function (card, index) {
       var cardValue = card[1];
       cards.forEach(function (key) {
         if (key !== card && key[1] === cardValue) {
-          console.log({
-            key: key,
-            card: card
-          });
+          //console.log({key, card});
           cards.splice(index, 1); //remove the card from the list
 
           pairs.push("pair");
-        }
+        } //console.log("cards length: ", cards.length)
 
-        console.log("cards length: ", cards.length);
       });
     });
     return pairs.length;
@@ -2117,8 +2077,7 @@ var helpers = {
         //first item is always a match
     cardValue = cardsArr.splice(0, 1)[0];
     cardsArr.forEach(function (card) {
-      console.log(card, cardValue);
-
+      //console.log(card, cardValue);
       if (card[index] === cardValue[index]) {
         matches.push(true);
       }
@@ -2173,41 +2132,28 @@ var HandChecks = /*#__PURE__*/function () {
 
   _createClass(HandChecks, [{
     key: "singlePair",
-    value: // constructor(hand){
-    //     this.playersCards = hand;
-    // }
-    function singlePair() {
-      var cards = _toConsumableArray(this.playersCards);
-
-      return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.pairsCheck(cards) === 1;
+    value: function singlePair() {
+      console.log(_pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.pairsCheck(_toConsumableArray(this.playersCards)) === 1);
+      return Boolean(_pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.pairsCheck(_toConsumableArray(this.playersCards)) === 1);
     }
   }, {
     key: "twoPair",
     value: function twoPair() {
-      var cards = _toConsumableArray(this.playersCards);
-
-      return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.pairsCheck(cards) === 2;
+      return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.pairsCheck(_toConsumableArray(this.playersCards)) === 2;
     }
   }, {
     key: "tripsCheck",
     value: function tripsCheck() {
       var cards = _toConsumableArray(this.playersCards),
-          firstRes = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardMatches(cards, 1);
+          firstRes = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardMatches(cards, 1); // console.log("First Card Loop", {cards});
 
-      console.log("First Card Loop", {
-        cards: cards
-      });
 
       if (firstRes.length < 3) {
-        console.log("Second Card Loop", {
-          cards: cards
-        });
+        //console.log("TRIPs Second Card Loop", {cards});
         var secondRes = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardMatches(cards, 1); //if firstRes.length < 4, run check again with the shortened array
 
         if (secondRes.length < 3) {
-          console.log("Third Card Loop", {
-            cards: cards
-          });
+          // console.log("Third Card Loop", {cards});
           var thirdRes = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardMatches(cards, 1); //if firstRes.length < 4, run check again with the shortened array
 
           if (thirdRes.length < 3) {
@@ -2288,11 +2234,8 @@ var HandChecks = /*#__PURE__*/function () {
   }, {
     key: "bookCheck",
     value: function bookCheck() {
-      var checkDeckForPair = _toConsumableArray(this.playersCards),
-          has1Pair = this.singlePair(checkDeckForPair),
-          checkDeckForTrips = _toConsumableArray(playersCards),
-          hasTrips = this.tripsCheck(checkDeckForTrips); //console.log({hasTrips, has1Pair});
-
+      var has1Pair = this.singlePair(),
+          hasTrips = this.tripsCheck(); //console.log({hasTrips, has1Pair});
 
       if (hasTrips && has1Pair) {
         return true;
@@ -2302,7 +2245,6 @@ var HandChecks = /*#__PURE__*/function () {
     } //  let playersCards  = [ "D2", "H2", "S2", "D6", "S6"];
     //  let bookCheckRes = bookCheck(playersCards);
     //  console.log(bookCheckRes);
-    //ToDo: Fix bug = Cards is not defined
 
   }, {
     key: "quadsCheck",
@@ -2312,11 +2254,6 @@ var HandChecks = /*#__PURE__*/function () {
 
       if (firstRes.length < 4) {
         var secondRes = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardMatches(cards, 1); //if firstRes.length < 4, run check again with the shortened array
-
-        console.log("Second Card Loop", {
-          cards: cards,
-          secondRes: secondRes
-        });
 
         if (secondRes.length < 4) {
           return false;
@@ -2333,12 +2270,8 @@ var HandChecks = /*#__PURE__*/function () {
   }, {
     key: "straightFlushCheck",
     value: function straightFlushCheck() {
-      // console.log(straightCheck(this.playersCards), flushCheck(this.playersCards))
-      if (this.straightCheck(this.playersCards) && this.flushCheck(this.playersCards)) {
-        return true;
-      }
-
-      return false;
+      //    console.log("S flush check", this.straightCheck(this.playersCards) &&  this.flushCheck(this.playersCards))
+      return this.straightCheck(this.playersCards) && this.flushCheck(this.playersCards);
     } // let playersCards  = [ "H10", "HJ", "HQ", "HK", "HA"];
     // let straightFlushCheckRes = straightFlushCheck(playersCards);
     // console.log(straightFlushCheckRes);
@@ -2346,14 +2279,9 @@ var HandChecks = /*#__PURE__*/function () {
   }, {
     key: "royalFlushCheck",
     value: function royalFlushCheck() {
-      // console.log("reached royal flush check")
-      var firstCardsValue = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(_toConsumableArray(this.playersCards))[0].value;
+      var firstCardsValue = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(_toConsumableArray(this.playersCards))[0].value; // console.log("StraightFLush check: ", firstCardsValue === 10 && this.straightCheck(this.playersCards) && this.flushCheck(this.playersCards))
 
-      if (firstCardsValue === 10 && this.straightCheck(this.playersCards) && this.flushCheck(this.playersCards)) {
-        return true;
-      }
-
-      return false;
+      return firstCardsValue === 10 && this.straightCheck(this.playersCards) && this.flushCheck(this.playersCards);
     } // let playersCards = [ "H10", "HJ", "HQ", "HK", "HA"];
     // let royalFlushCheckRes = royalFlushCheck(playersCards);
     // console.log(royalFlushCheckRes);
@@ -2381,12 +2309,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _helpers_pokerHandsHandChecks__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../helpers/pokerHandsHandChecks */ "./resources/js/helpers/pokerHandsHandChecks.js");
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -2421,10 +2343,7 @@ var getHandValue = /*#__PURE__*/function (_handChecks) {
 
     _this = _super.call(this);
     _this.playersCards = hand;
-    _this.rank = {
-      value: null,
-      type: null
-    };
+    _this.rank = {};
 
     _this.checkValue();
 
@@ -2433,87 +2352,63 @@ var getHandValue = /*#__PURE__*/function (_handChecks) {
 
   _createClass(getHandValue, [{
     key: "updateRank",
-    value: function updateRank(_ref) {
-      var rankObj = _ref.rankObj;
-      this.rank = _objectSpread(_objectSpread({}, this.rank), {}, {
-        rankObj: rankObj
-      });
+    value: function updateRank(rankObj) {
+      this.rank = rankObj;
     }
   }, {
     key: "checkValue",
     value: function checkValue() {
-      switch (this.playersCards) {
-        case this.royalFlushCheck(this.playersCards):
-          this.updateRank({
-            value: 0,
-            type: "Royal Flush"
-          });
-          break;
-
-        case this.straightFlushCheck(this.playersCards):
-          this.updateRank({
-            value: 1,
-            type: "Straight Flush"
-          });
-          break;
-
-        case this.quadsCheck(this.playersCards):
-          this.updateRank({
-            value: 2,
-            type: "Four of a kind"
-          });
-          break;
-
-        case this.bookCheck(this.playersCards):
-          this.updateRank({
-            value: 3,
-            type: "Full House"
-          });
-          break;
-
-        case this.flushCheck(this.playersCards):
-          this.updateRank({
-            value: 4,
-            type: "Flush"
-          });
-          break;
-
-        case this.straightCheck(this.playersCards):
-          this.updateRank({
-            value: 5,
-            type: "Straight"
-          });
-          break;
-
-        case this.tripsCheck(this.playersCards):
-          this.updateRank({
-            value: 6,
-            type: "Three of a kind"
-          });
-          break;
-
-        case this.twoPair(this.playersCards):
-          this.updateRank({
-            value: 7,
-            type: "Two pairs"
-          });
-          break;
-
-        case this.singlePair(this.playersCards):
-          this.updateRank({
-            value: 8,
-            type: "One pair"
-          });
-          break;
-
-        default:
-          this.updateRank({
-            value: 9,
-            type: ""
-          });
+      if (this.royalFlushCheck(this.playersCards)) {
+        return this.updateRank({
+          value: 0,
+          type: "Royal Flush"
+        });
+      } else if (this.straightFlushCheck(this.playersCards)) {
+        return this.updateRank({
+          value: 1,
+          type: "Straight Flush"
+        });
+      } else if (this.quadsCheck(this.playersCards)) {
+        return this.updateRank({
+          value: 2,
+          type: "Four of a kind"
+        });
+      } else if (this.bookCheck(this.playersCards)) {
+        return this.updateRank({
+          value: 3,
+          type: "Full House"
+        });
+      } else if (this.flushCheck(this.playersCards)) {
+        return this.updateRank({
+          value: 4,
+          type: "Flush"
+        });
+      } else if (this.straightCheck(this.playersCards)) {
+        return this.updateRank({
+          value: 5,
+          type: "Straight"
+        });
+      } else if (this.tripsCheck(this.playersCards)) {
+        return this.updateRank({
+          value: 6,
+          type: "Three of a kind"
+        });
+      } else if (this.twoPair(this.playersCards)) {
+        return this.updateRank({
+          value: 7,
+          type: "Two pairs"
+        });
+      } else if (this.singlePair(this.playersCards)) {
+        return this.updateRank({
+          value: 8,
+          type: "One pair"
+        });
+      } else {
+        return this.updateRank({
+          value: 9,
+          type: ""
+        });
       }
-
-      return this.rank;
     }
   }]);
 
@@ -2598,9 +2493,9 @@ vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.d
       var state = _ref5.state;
       var results = [];
       state.players.forEach(function (player) {
-        //console.log(player.hand)
-        var val = new _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.getHandValue(player.hand);
-        console.log(val); //results.push();
+        var val = new _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.getHandValue(player.hand); //console.log(val)
+
+        results.push(val);
       });
       console.log({
         results: results
@@ -38107,45 +38002,6 @@ process.umask = function() { return 0; };
 
 /***/ }),
 
-/***/ "./resources/js/components/ExampleComponent.vue":
-/*!******************************************************!*\
-  !*** ./resources/js/components/ExampleComponent.vue ***!
-  \******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ExampleComponent.vue?vue&type=template&id=299e239e& */ "./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e&");
-/* harmony import */ var _ExampleComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ExampleComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js&");
-/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
-
-
-
-
-
-/* normalize component */
-;
-var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__.default)(
-  _ExampleComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__.default,
-  _ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__.render,
-  _ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
-
-/* hot reload */
-if (false) { var api; }
-component.options.__file = "resources/js/components/ExampleComponent.vue"
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (component.exports);
-
-/***/ }),
-
 /***/ "./resources/js/components/PokerHands.vue":
 /*!************************************************!*\
   !*** ./resources/js/components/PokerHands.vue ***!
@@ -38187,22 +38043,6 @@ component.options.__file = "resources/js/components/PokerHands.vue"
 
 /***/ }),
 
-/***/ "./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js&":
-/*!*******************************************************************************!*\
-  !*** ./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js& ***!
-  \*******************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ExampleComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./ExampleComponent.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/ExampleComponent.vue?vue&type=script&lang=js&");
- /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ExampleComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__.default); 
-
-/***/ }),
-
 /***/ "./resources/js/components/PokerHands.vue?vue&type=script&lang=js&":
 /*!*************************************************************************!*\
   !*** ./resources/js/components/PokerHands.vue?vue&type=script&lang=js& ***!
@@ -38216,23 +38056,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PokerHands_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./PokerHands.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/PokerHands.vue?vue&type=script&lang=js&");
  /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PokerHands_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__.default); 
-
-/***/ }),
-
-/***/ "./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e&":
-/*!*************************************************************************************!*\
-  !*** ./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e& ***!
-  \*************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "render": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__.render),
-/* harmony export */   "staticRenderFns": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
-/* harmony export */ });
-/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ExampleComponent_vue_vue_type_template_id_299e239e___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./ExampleComponent.vue?vue&type=template&id=299e239e& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e&");
-
 
 /***/ }),
 
@@ -38266,54 +38089,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (unknown) */ var __WEBPACK_REEXPORT_OBJECT__ = {};
 /* harmony reexport (unknown) */ for(const __WEBPACK_IMPORT_KEY__ in _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_2_node_modules_vue_loader_lib_index_js_vue_loader_options_PokerHands_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== "default") __WEBPACK_REEXPORT_OBJECT__[__WEBPACK_IMPORT_KEY__] = () => _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_9_0_rules_0_use_2_node_modules_vue_loader_lib_index_js_vue_loader_options_PokerHands_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__[__WEBPACK_IMPORT_KEY__]
 /* harmony reexport (unknown) */ __webpack_require__.d(__webpack_exports__, __WEBPACK_REEXPORT_OBJECT__);
-
-
-/***/ }),
-
-/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e&":
-/*!****************************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/ExampleComponent.vue?vue&type=template&id=299e239e& ***!
-  \****************************************************************************************************************************************************************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "render": () => (/* binding */ render),
-/* harmony export */   "staticRenderFns": () => (/* binding */ staticRenderFns)
-/* harmony export */ });
-var render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _vm._m(0)
-}
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "container" }, [
-      _c("div", { staticClass: "row justify-content-center" }, [
-        _c("div", { staticClass: "col-md-8" }, [
-          _c("div", { staticClass: "card" }, [
-            _c("div", { staticClass: "card-header" }, [
-              _vm._v("Example Component")
-            ]),
-            _vm._v(" "),
-            _c("div", { staticClass: "card-body" }, [
-              _vm._v(
-                "\n                    I'm an example component.\n                "
-              )
-            ])
-          ])
-        ])
-      ])
-    ])
-  }
-]
-render._withStripped = true
-
 
 
 /***/ }),

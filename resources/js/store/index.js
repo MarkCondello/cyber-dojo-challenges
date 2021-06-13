@@ -44,10 +44,9 @@ export default new Vuex.Store({
              let results= [];
 
             state.players.forEach(player=>{
-                //console.log(player.hand)
                 let val = new getHandValue(player.hand);
-                console.log(val)
-                //results.push();
+                //console.log(val)
+                results.push(val);
             });
 
             console.log({results})

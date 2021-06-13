@@ -1,24 +1,24 @@
 export let helpers = {
     //  Helpers Start
 
-    pairsCheck(){
+    pairsCheck(cards){
         let pairs = [];
 
         cards.forEach((card, index) =>  {
             let cardValue = card[1];
             cards.forEach(key => {
                 if(key !== card && key[1] === cardValue){
-                    console.log({key, card});
+                    //console.log({key, card});
                     cards.splice(index, 1); //remove the card from the list
                     pairs.push("pair");
                 }
-                console.log("cards length: ", cards.length)
+                //console.log("cards length: ", cards.length)
             });
         });
         return pairs.length;
     },
 
-     getCardsValues(cardsArr) {
+    getCardsValues(cardsArr) {
         let cardItemsWithValues = [];
         cardsArr.forEach(card => {
             let cardValue = card[1];
@@ -69,8 +69,9 @@ export let helpers = {
      getCardMatches(cardsArr, index){
         let matches = [true, ], //first item is always a match
         cardValue = cardsArr.splice(0, 1)[0];
+
         cardsArr.forEach(card => {
-            console.log(card, cardValue);
+            //console.log(card, cardValue);
             if(card[index] === cardValue[index]){
                 matches.push(true);
             }
