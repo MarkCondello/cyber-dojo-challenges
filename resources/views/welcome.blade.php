@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script src="{{ asset('js/app.js') }}" defer></script>
 
-        <title>Laravel</title>
+        <title>Cyber Dojo</title>
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
@@ -28,11 +28,23 @@
             @php 
             $players= [
                     (object)[
+                        "id" => 123321,
                         "name" => "white",
                         "hand" => [],
                     ],
                     (object)[
+                        "id" => 987789,
                         "name" => "black",
+                        "hand" => [],
+                    ],
+                    (object)[
+                        "id" => 678876,
+                        "name" => "red",
+                        "hand" => [],
+                    ],
+                    (object)[
+                        "id" => 987765,
+                        "name" => "blue",
                         "hand" => [],
                     ],
                 ];

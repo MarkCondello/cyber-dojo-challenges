@@ -34,16 +34,15 @@ export default {
     },
 
     created() {
-        this.addPlayers({players: this.playerItems});
+        // Add this back in after testings
+        //this.addPlayers({players: this.playerItems});
     },
     computed: {
         ...mapState(['players']),
     },
     methods: {
         ...mapActions(['dealCards', 'addPlayers', 'winningHand']),
-        //...mapGetters([' ']),
-        handleGetWinner(){
-         //ToDo: create a action to getWinningHand
+         handleGetWinner(){
             this.winningHand()
         }
     }

@@ -1,21 +1,17 @@
 export let helpers = {
-    //  Helpers Start
-
+ 
     pairsCheck(cards){
         let pairs = [];
-
         cards.forEach((card, index) =>  {
             let cardValue = card[1];
             cards.forEach(key => {
                 if(key !== card && key[1] === cardValue){
-                    //console.log({key, card});
+                    pairs.push(card);
                     cards.splice(index, 1); //remove the card from the list
-                    pairs.push("pair");
                 }
-                //console.log("cards length: ", cards.length)
-            });
+             });
         });
-        return pairs.length;
+        return pairs;
     },
 
     getCardsValues(cardsArr) {
@@ -66,7 +62,7 @@ export let helpers = {
     },
 
     // helper for 4 and 3 of a kind and flushes
-     getCardMatches(cardsArr, index){
+    getCardMatches(cardsArr, index){
         let matches = [true, ], //first item is always a match
         cardValue = cardsArr.splice(0, 1)[0];
 

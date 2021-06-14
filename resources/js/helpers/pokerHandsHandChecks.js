@@ -1,16 +1,13 @@
 import {helpers} from "./pokerHandHelpers";
 
-
-//ToDo: Need to know the high card for comparison of players with the same hand type
 export default class HandChecks {
-
     singlePair(){
-        console.log(helpers.pairsCheck([...this.playersCards]) === 1);
-        return Boolean(helpers.pairsCheck([...this.playersCards]) === 1);
+        console.log(helpers.pairsCheck([...this.playersCards]).length === 1);
+        return Boolean(helpers.pairsCheck([...this.playersCards]).length === 1);
     }
 
     twoPair(){
-        return helpers.pairsCheck([...this.playersCards]) === 2;
+        return helpers.pairsCheck([...this.playersCards]).length === 2;
     }
 
     tripsCheck(){

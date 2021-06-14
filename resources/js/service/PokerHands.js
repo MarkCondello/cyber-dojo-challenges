@@ -1,4 +1,29 @@
 import handChecks from '../helpers/pokerHandsHandChecks';
+import {compareHighHandsHelpers} from '../helpers/pokerHandsCompareHightHandsHelpers';
+
+export class compareHighHands {
+   constructor(hands){
+      this.playersHands = [...hands];
+      this.handValue = null;
+      this.highestHand = null;
+      this.getHandType();
+   }
+   getHandType(){
+      this.handValue = this.playersHands[0].handValue;
+      this.checkValue();
+   }
+   checkValue(){
+      switch(this.handValue.type){
+         case "One pair":
+            console.log("Reached one pair check");
+            this.highestHand = compareHighHandsHelpers.comparePairs(this.playersHands);
+            break;
+         default :
+         //check for highest card
+         break
+      }
+   }
+}
 
 export class getHandValue extends handChecks{
    constructor(hand){
@@ -7,11 +32,9 @@ export class getHandValue extends handChecks{
       this.rank = {};
       this.checkValue();
    }
-
    updateRank(rankObj){
       this.rank = rankObj;
    }
-
    checkValue(){
       if( this.royalFlushCheck(this.playersCards)){
          return this.updateRank({value: 0, type: "Royal Flush"});
