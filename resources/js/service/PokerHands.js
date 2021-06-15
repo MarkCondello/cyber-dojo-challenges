@@ -4,22 +4,34 @@ import {compareHighHandsHelpers} from '../helpers/pokerHandsCompareHightHandsHel
 export class compareHighHands {
    constructor(hands){
       this.playersHands = [...hands];
-      this.handValue = null;
+      this.handType = null;
       this.highestHand = null;
+      this.kicker = null; //Add kicker value in for two pair
       this.getHandType();
    }
    getHandType(){
-      this.handValue = this.playersHands[0].handValue;
+      // console.log({'playersHands': this.playersHands})
+      this.handType = this.playersHands[0].handValue.type;
       this.checkValue();
    }
    checkValue(){
-      switch(this.handValue.type){
+      switch(this.handType){
+         case "Two pairs":
+            console.log("Reached two pair check");
+
+            // ToDo: Write the compare logic for 2 pair 
+            this.highestHand = compareHighHandsHelpers.compareTwoPairHighCards(this.playersHands);
+
+            break;
          case "One pair":
             console.log("Reached one pair check");
-            this.highestHand = compareHighHandsHelpers.comparePairs(this.playersHands);
+            this.highestHand = compareHighHandsHelpers.compareHighCards(this.playersHands);
             break;
+         case "High card":
          default :
-         //check for highest card
+         console.log("Reached compare high cards check");
+         this.highestHand = compareHighHandsHelpers.compareHighCards(this.playersHands);
+
          break
       }
    }
@@ -50,12 +62,14 @@ export class getHandValue extends handChecks{
          return this.updateRank({value: 5, type: "Straight"});
       } else if (this.tripsCheck(this.playersCards)){
          return this.updateRank({value: 6, type: "Three of a kind"});
+
       } else if (this.twoPair(this.playersCards)){
-         return this.updateRank({value: 7, type: "Two pairs"});
+         return this.updateRank({value: 7, type: "Two pairs", highCard: this.twoPair(this.playersCards)});
+
       } else if(this.singlePair(this.playersCards)){         
-         return this.updateRank({value: 8, type: "One pair"});
+         return this.updateRank({value: 8, type: "One pair", highCard: this.singlePair(this.playersCards) });
       } else {
-         return this.updateRank({value: 9, type: ""});
+         return this.updateRank({value: 9, type: "High card",  highCard: this.highCard(this.playersCards) });
       }
    }
 }

@@ -2024,6 +2024,7 @@ var helpers = {
     return pairs;
   },
   getCardsValues: function getCardsValues(cardsArr) {
+    // console.log("getCardsValues, cardsArr:", cardsArr)
     var cardItemsWithValues = [];
     cardsArr.forEach(function (card) {
       var cardValue = card[1];
@@ -2108,12 +2109,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "compareHighHandsHelpers": () => (/* binding */ compareHighHandsHelpers)
 /* harmony export */ });
 /* harmony import */ var _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./pokerHandHelpers */ "./resources/js/helpers/pokerHandHelpers.js");
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -2129,27 +2124,18 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
  //ToDo: Need to know the high card for comparison of players with the same hand type
 
 var compareHighHandsHelpers = {
-  // Check for the highest hand of pairs
-  comparePairs: function comparePairs(playersHighHands) {
-    var playersHighCardValuesSorted = _toConsumableArray(playersHighHands).map(function (playersHand) {
-      return _objectSpread(_objectSpread({}, playersHand), {}, {
-        highCard: _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.pairsCheck(_toConsumableArray(playersHand.hand))
-      });
-    }).map(function (playersHighCard) {
-      return _objectSpread(_objectSpread({}, playersHighCard), {}, {
-        highCard: _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardsValues(playersHighCard.highCard)
-      });
-    }).sort(function (playerA, playerB) {
-      return playerB.highCard[0].value - playerA.highCard[0].value;
+  compareTwoPairHighCards: function compareTwoPairHighCards(playersHighHands) {},
+  // Check for the highest hand
+  compareHighCards: function compareHighCards(playersHighHands) {
+    //console.log({playersHighHands})
+    var playersHighCardValuesSorted = _toConsumableArray(playersHighHands).sort(function (playerA, playerB) {
+      return playerB.handValue.highCard.value - playerA.handValue.highCard.value;
     });
 
     playersHighCardValuesSorted[0].arrayIndex = playersHighHands.findIndex(function (highHands) {
       return highHands.id === playersHighCardValuesSorted[0].id;
     });
     return playersHighCardValuesSorted[0];
-    console.log({
-      playersHighCards: playersHighCards
-    }); //
   }
 };
 
@@ -2193,15 +2179,27 @@ var HandChecks = /*#__PURE__*/function () {
   }
 
   _createClass(HandChecks, [{
+    key: "highCard",
+    value: function highCard() {
+      return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(_toConsumableArray(this.playersCards)).pop();
+    }
+  }, {
     key: "singlePair",
     value: function singlePair() {
-      console.log(_pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.pairsCheck(_toConsumableArray(this.playersCards)).length === 1);
-      return Boolean(_pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.pairsCheck(_toConsumableArray(this.playersCards)).length === 1);
+      var pairs = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.pairsCheck(_toConsumableArray(this.playersCards));
+
+      if (pairs.length === 1) {
+        return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardsValues(pairs).pop();
+      }
     }
   }, {
     key: "twoPair",
     value: function twoPair() {
-      return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.pairsCheck(_toConsumableArray(this.playersCards)).length === 2;
+      var pairs = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.pairsCheck(_toConsumableArray(this.playersCards));
+
+      if (pairs.length === 2) {
+        return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(pairs);
+      }
     }
   }, {
     key: "tripsCheck",
@@ -2413,28 +2411,39 @@ var compareHighHands = /*#__PURE__*/function () {
     _classCallCheck(this, compareHighHands);
 
     this.playersHands = _toConsumableArray(hands);
-    this.handValue = null;
+    this.handType = null;
     this.highestHand = null;
+    this.kicker = null; //Add kicker value in for two pair
+
     this.getHandType();
   }
 
   _createClass(compareHighHands, [{
     key: "getHandType",
     value: function getHandType() {
-      this.handValue = this.playersHands[0].handValue;
+      // console.log({'playersHands': this.playersHands})
+      this.handType = this.playersHands[0].handValue.type;
       this.checkValue();
     }
   }, {
     key: "checkValue",
     value: function checkValue() {
-      switch (this.handValue.type) {
-        case "One pair":
-          console.log("Reached one pair check");
-          this.highestHand = _helpers_pokerHandsCompareHightHandsHelpers__WEBPACK_IMPORTED_MODULE_1__.compareHighHandsHelpers.comparePairs(this.playersHands);
+      switch (this.handType) {
+        case "Two pairs":
+          console.log("Reached two pair check"); // ToDo: Write the compare logic for 2 pair 
+
+          this.highestHand = _helpers_pokerHandsCompareHightHandsHelpers__WEBPACK_IMPORTED_MODULE_1__.compareHighHandsHelpers.compareTwoPairHighCards(this.playersHands);
           break;
 
+        case "One pair":
+          console.log("Reached one pair check");
+          this.highestHand = _helpers_pokerHandsCompareHightHandsHelpers__WEBPACK_IMPORTED_MODULE_1__.compareHighHandsHelpers.compareHighCards(this.playersHands);
+          break;
+
+        case "High card":
         default:
-          //check for highest card
+          console.log("Reached compare high cards check");
+          this.highestHand = _helpers_pokerHandsCompareHightHandsHelpers__WEBPACK_IMPORTED_MODULE_1__.compareHighHandsHelpers.compareHighCards(this.playersHands);
           break;
       }
     }
@@ -2507,17 +2516,20 @@ var getHandValue = /*#__PURE__*/function (_handChecks) {
       } else if (this.twoPair(this.playersCards)) {
         return this.updateRank({
           value: 7,
-          type: "Two pairs"
+          type: "Two pairs",
+          highCard: this.twoPair(this.playersCards)
         });
       } else if (this.singlePair(this.playersCards)) {
         return this.updateRank({
           value: 8,
-          type: "One pair"
+          type: "One pair",
+          highCard: this.singlePair(this.playersCards)
         });
       } else {
         return this.updateRank({
           value: 9,
-          type: ""
+          type: "High card",
+          highCard: this.highCard(this.playersCards)
         });
       }
     }
@@ -2567,6 +2579,12 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
 
 
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
@@ -2583,15 +2601,15 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
     {
       "id": 987789,
       "name": "black",
-      "hand": ["SJ", "H9", "C4", "H6", "D4"]
+      "hand": ["S9", "H9", "C4", "H6", "D6"]
     }, {
       "id": 123321,
       "name": "white",
-      "hand": ["D8", "D10", "HK", "H2", "C2"]
+      "hand": ["D8", "S8", "HK", "H2", "C2"]
     }, {
       "id": 345543,
       "name": "grey",
-      "hand": ["DJ", "S9", "C9", "S6", "S4"]
+      "hand": ["DQ", "S9", "C10", "S6", "S4"]
     }]
   },
   mutations: {
@@ -2647,7 +2665,7 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
     },
     winningHand: function winningHand(_ref7) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
-        var state, commit, getters, matchingHighHands, result;
+        var state, commit, getters, matchingHighHands, result, rank;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -2655,9 +2673,7 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
                 state = _ref7.state, commit = _ref7.commit, getters = _ref7.getters;
                 _context.next = 3;
                 return state.players.forEach(function (player, arrayId) {
-                  var rank = new _service_PokerHands__WEBPACK_IMPORTED_MODULE_2__.getHandValue(player.hand).rank; //console.log("winningHand action: ", {rank, arrayId})
-
-                  //console.log("winningHand action: ", {rank, arrayId})
+                  var rank = new _service_PokerHands__WEBPACK_IMPORTED_MODULE_2__.getHandValue(player.hand).rank;
                   commit('SET_HAND_RANK', {
                     rank: rank,
                     arrayId: arrayId
@@ -2670,21 +2686,23 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
 
               case 5:
                 matchingHighHands = _context.sent;
+                console.log({
+                  matchingHighHands: matchingHighHands
+                });
 
                 if (matchingHighHands.length > 1) {
                   //use service to loop through the matching high hands
                   result = new _service_PokerHands__WEBPACK_IMPORTED_MODULE_2__.compareHighHands(matchingHighHands);
                   console.log({
-                    result: result,
-                    highestHand: result.highestHand
-                  }); //ToDo: 
-                  //I want to update the handValue if the winning hand
-                  //let rank = { ...result.highestHand.handValue, 
-                  // type: `${result.highestHand.type} with a ${result.highestHand.highCard[0].card} high card`,
-                  //}
-                  //commit('SET_HAND_RANK', {rank: , arrayId: result.highestHand.arrayIndex}); 
-                  //Check this below works properly
-
+                    result: result
+                  });
+                  rank = _objectSpread(_objectSpread({}, result.highestHand.handValue), {}, {
+                    type: "".concat(result.handType, " with a ").concat(result.highestHand.handValue.highCard.card, " high card")
+                  });
+                  commit('SET_HAND_RANK', {
+                    rank: rank,
+                    arrayId: result.highestHand.arrayIndex
+                  });
                   commit('SET_WINNING_HAND', {
                     playerId: result.highestHand.id
                   });
@@ -2694,7 +2712,7 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
                   }); ///console.log("Winning player id", getters.sortHandsByRank[0].id);
                 }
 
-              case 7:
+              case 8:
               case "end":
                 return _context.stop();
             }

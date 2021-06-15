@@ -15,6 +15,7 @@ export let helpers = {
     },
 
     getCardsValues(cardsArr) {
+       // console.log("getCardsValues, cardsArr:", cardsArr)
         let cardItemsWithValues = [];
         cardsArr.forEach(card => {
             let cardValue = card[1];

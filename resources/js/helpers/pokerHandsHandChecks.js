@@ -1,13 +1,22 @@
 import {helpers} from "./pokerHandHelpers";
 
 export default class HandChecks {
+    highCard(){
+        return helpers.sortCardsByValues([...this.playersCards]).pop();
+    }
+
     singlePair(){
-        console.log(helpers.pairsCheck([...this.playersCards]).length === 1);
-        return Boolean(helpers.pairsCheck([...this.playersCards]).length === 1);
+        let pairs = helpers.pairsCheck([...this.playersCards])
+        if(pairs.length === 1) {
+            return helpers.getCardsValues(pairs).pop();   
+        }
     }
 
     twoPair(){
-        return helpers.pairsCheck([...this.playersCards]).length === 2;
+        let pairs = helpers.pairsCheck([...this.playersCards]);
+        if(pairs.length === 2){
+           return helpers.sortCardsByValues(pairs);
+        }
     }
 
     tripsCheck(){

@@ -10,9 +10,9 @@ export default new Vuex.Store({
         deck,
         players: [
             // Remove this after doing compare checks
-            {"id": 987789, "name":"black","hand":["SJ","H9","C4","H6","D4"]},
-            {"id": 123321, "name":"white","hand":["D8","D10","HK","H2","C2"]},
-            {"id": 345543, "name":"grey","hand":["DJ","S9","C9","S6","S4"]}
+            {"id": 987789, "name":"black","hand":["S9","H9","C4","H6","D6"]},
+            {"id": 123321, "name":"white","hand":["D8","S8","HK","H2","C2"]},
+            {"id": 345543, "name":"grey","hand":["DQ","S9","C10","S6","S4"]}
         ],
     },
     mutations: {
@@ -57,26 +57,22 @@ export default new Vuex.Store({
 
             await state.players.forEach((player, arrayId)=>{
                 let rank = new getHandValue(player.hand).rank;
-                //console.log("winningHand action: ", {rank, arrayId})
                 commit('SET_HAND_RANK', {rank, arrayId}); 
             });
 
             let matchingHighHands = await getters.matchingHighHands;
+
+            console.log({matchingHighHands})
             if(matchingHighHands.length > 1 ) {
                 //use service to loop through the matching high hands
                 let result = new compareHighHands(matchingHighHands);
-                console.log({result, highestHand: result.highestHand});
+                console.log({result});
 
-                //ToDo: 
-                //I want to update the handValue if the winning hand
-                //let rank = { ...result.highestHand.handValue, 
-                // type: `${result.highestHand.type} with a ${result.highestHand.highCard[0].card} high card`,
-                //}
-                 //commit('SET_HAND_RANK', {rank: , arrayId: result.highestHand.arrayIndex}); 
-
-                 //Check this below works properly
-                 commit('SET_WINNING_HAND', { playerId : result.highestHand.id })
-
+                let rank = { ...result.highestHand.handValue, 
+                    type: `${result.handType} with a ${result.highestHand.handValue.highCard.card} high card`,
+                }
+                commit('SET_HAND_RANK', {rank, arrayId: result.highestHand.arrayIndex}); 
+                commit('SET_WINNING_HAND', { playerId : result.highestHand.id })
             } else {
                 commit('SET_WINNING_HAND', { playerId : getters.sortHandsByRank[0].id })
                 ///console.log("Winning player id", getters.sortHandsByRank[0].id);
