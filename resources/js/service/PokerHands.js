@@ -1,8 +1,9 @@
 import handChecks from '../helpers/pokerHandsHandChecks';
-import {compareHighHandsHelpers} from '../helpers/pokerHandsCompareHightHandsHelpers';
+import compareHighHandsHelpers from '../helpers/pokerHandsCompareHightHandsHelpers';
 
-export class compareHighHands {
+export class compareHighHands extends compareHighHandsHelpers{
    constructor(hands){
+      super();
       this.playersHands = [...hands];
       this.handType = null;
       this.highestHand = null;
@@ -10,29 +11,27 @@ export class compareHighHands {
       this.getHandType();
    }
    getHandType(){
-      // console.log({'playersHands': this.playersHands})
+      //   console.log({'playersHands': this.playersHands})
       this.handType = this.playersHands[0].handValue.type;
       this.checkValue();
    }
    checkValue(){
       switch(this.handType){
          case "Two pairs":
-            console.log("Reached two pair check");
+            //console.log("Reached two pair check", this.playersHands);
 
             // ToDo: Write the compare logic for 2 pair 
-            this.highestHand = compareHighHandsHelpers.compareTwoPairHighCards(this.playersHands);
-
+            this.highestHand = this.compareTwoPairHighCards(this.playersHands);
             break;
          case "One pair":
             console.log("Reached one pair check");
-            this.highestHand = compareHighHandsHelpers.compareHighCards(this.playersHands);
+            this.highestHand = this.compareHighCards(this.playersHands);
             break;
          case "High card":
          default :
-         console.log("Reached compare high cards check");
-         this.highestHand = compareHighHandsHelpers.compareHighCards(this.playersHands);
-
-         break
+            console.log("Reached compare high cards check");
+            this.highestHand = this.compareHighCards(this.playersHands);
+            break
       }
    }
 }

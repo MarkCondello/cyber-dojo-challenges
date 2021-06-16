@@ -76,7 +76,11 @@ export let helpers = {
         return matches;
     },
 
-    sortCardsByValues(cards){
-        return this.getCardsValues(cards).sort((first, second) => first.value - second.value);
+    sortCardsByValues(cards, dir = 'asc'){
+        if(dir === 'asc'){
+            return this.getCardsValues(cards).sort((first, second) => first.value - second.value);
+        } else {
+            return this.getCardsValues(cards).sort((first, second) =>  second.value - first.value);
+        }
     }
 }

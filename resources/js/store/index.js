@@ -12,7 +12,7 @@ export default new Vuex.Store({
             // Remove this after doing compare checks
             {"id": 987789, "name":"black","hand":["S9","H9","C4","H6","D6"]},
             {"id": 123321, "name":"white","hand":["D8","S8","HK","H2","C2"]},
-            {"id": 345543, "name":"grey","hand":["DQ","S9","C10","S6","S4"]}
+            {"id": 345543, "name":"grey","hand":["DQ","SQ","C10","C4","S4"]}
         ],
     },
     mutations: {
@@ -67,7 +67,8 @@ export default new Vuex.Store({
                 //use service to loop through the matching high hands
                 let result = new compareHighHands(matchingHighHands);
                 console.log({result});
-
+                //before creating the compare method, return out the rank and commit setup below...
+                return;
                 let rank = { ...result.highestHand.handValue, 
                     type: `${result.handType} with a ${result.highestHand.handValue.highCard.card} high card`,
                 }

@@ -2089,9 +2089,17 @@ var helpers = {
     return matches;
   },
   sortCardsByValues: function sortCardsByValues(cards) {
-    return this.getCardsValues(cards).sort(function (first, second) {
-      return first.value - second.value;
-    });
+    var dir = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'asc';
+
+    if (dir === 'asc') {
+      return this.getCardsValues(cards).sort(function (first, second) {
+        return first.value - second.value;
+      });
+    } else {
+      return this.getCardsValues(cards).sort(function (first, second) {
+        return second.value - first.value;
+      });
+    }
   }
 };
 
@@ -2106,7 +2114,7 @@ var helpers = {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "compareHighHandsHelpers": () => (/* binding */ compareHighHandsHelpers)
+/* harmony export */   "default": () => (/* binding */ compareHighHandsHelpers)
 /* harmony export */ });
 /* harmony import */ var _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./pokerHandHelpers */ "./resources/js/helpers/pokerHandHelpers.js");
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
@@ -2121,23 +2129,63 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToAr
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
  //ToDo: Need to know the high card for comparison of players with the same hand type
 
-var compareHighHandsHelpers = {
-  compareTwoPairHighCards: function compareTwoPairHighCards(playersHighHands) {},
-  // Check for the highest hand
-  compareHighCards: function compareHighCards(playersHighHands) {
-    //console.log({playersHighHands})
-    var playersHighCardValuesSorted = _toConsumableArray(playersHighHands).sort(function (playerA, playerB) {
-      return playerB.handValue.highCard.value - playerA.handValue.highCard.value;
-    });
-
-    playersHighCardValuesSorted[0].arrayIndex = playersHighHands.findIndex(function (highHands) {
-      return highHands.id === playersHighCardValuesSorted[0].id;
-    });
-    return playersHighCardValuesSorted[0];
+var compareHighHandsHelpers = /*#__PURE__*/function () {
+  function compareHighHandsHelpers() {
+    _classCallCheck(this, compareHighHandsHelpers);
   }
-};
+
+  _createClass(compareHighHandsHelpers, [{
+    key: "compareTwoPairHighCards",
+    value: function compareTwoPairHighCards() {
+      var playersHighPairValuesSorted = _toConsumableArray(this.playersHands).sort(function (playerA, playerB) {
+        return playerB.handValue.highCard[0].value - playerA.handValue.highCard[0].value;
+      }); //if there ate no mathching high cards from plauers return the high hand
+
+
+      if (playersHighPairValuesSorted[0].handValue.highCard[0].value === playersHighPairValuesSorted[1].handValue.highCard[0].value) {
+        var playersSecondPairValuesSorted = _toConsumableArray(playersHighPairValuesSorted).sort(function (playerA, playerB) {
+          return playerB.handValue.highCard[1].value - playerA.handValue.highCard[1].value;
+        });
+
+        if (playersSecondPairValuesSorted[0].handValue.highCard[1].value === playersSecondPairValuesSorted[1].handValue.highCard[1].value) {// Split pot
+          //ToDo: loop
+        } else {
+          this.kicker = playersSecondPairValuesSorted[0];
+        } // console.log({playersHighPairValuesSorted, playersHands: [...this.playersHands] })
+
+      } else {
+        return playersHighPairValuesSorted[0];
+      }
+    } // Check for the highest hand
+
+  }, {
+    key: "compareHighCards",
+    value: function compareHighCards() {
+      //console.log({playersHighHands})
+      var playersHighCardValuesSorted = _toConsumableArray(this.playersHighHands).sort(function (playerA, playerB) {
+        return playerB.handValue.highCard.value - playerA.handValue.highCard.value;
+      });
+
+      playersHighCardValuesSorted[0].arrayIndex = this.playersHighHands.findIndex(function (highHands) {
+        return highHands.id === playersHighCardValuesSorted[0].id;
+      }); // ToDo: Need a check for same high cards eg Split pot
+
+      return playersHighCardValuesSorted[0];
+    }
+  }]);
+
+  return compareHighHandsHelpers;
+}();
+
+
 
 /***/ }),
 
@@ -2198,7 +2246,7 @@ var HandChecks = /*#__PURE__*/function () {
       var pairs = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.pairsCheck(_toConsumableArray(this.playersCards));
 
       if (pairs.length === 2) {
-        return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(pairs);
+        return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(pairs, 'desc');
       }
     }
   }, {
@@ -2372,20 +2420,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _helpers_pokerHandsCompareHightHandsHelpers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helpers/pokerHandsCompareHightHandsHelpers */ "./resources/js/helpers/pokerHandsCompareHightHandsHelpers.js");
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -2404,24 +2438,47 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 
-var compareHighHands = /*#__PURE__*/function () {
+
+var compareHighHands = /*#__PURE__*/function (_compareHighHandsHelp) {
+  _inherits(compareHighHands, _compareHighHandsHelp);
+
+  var _super = _createSuper(compareHighHands);
+
   function compareHighHands(hands) {
+    var _this;
+
     _classCallCheck(this, compareHighHands);
 
-    this.playersHands = _toConsumableArray(hands);
-    this.handType = null;
-    this.highestHand = null;
-    this.kicker = null; //Add kicker value in for two pair
+    _this = _super.call(this);
+    _this.playersHands = _toConsumableArray(hands);
+    _this.handType = null;
+    _this.highestHand = null;
+    _this.kicker = null; //Add kicker value in for two pair
 
-    this.getHandType();
+    _this.getHandType();
+
+    return _this;
   }
 
   _createClass(compareHighHands, [{
     key: "getHandType",
     value: function getHandType() {
-      // console.log({'playersHands': this.playersHands})
+      //   console.log({'playersHands': this.playersHands})
       this.handType = this.playersHands[0].handValue.type;
       this.checkValue();
     }
@@ -2430,44 +2487,44 @@ var compareHighHands = /*#__PURE__*/function () {
     value: function checkValue() {
       switch (this.handType) {
         case "Two pairs":
-          console.log("Reached two pair check"); // ToDo: Write the compare logic for 2 pair 
-
-          this.highestHand = _helpers_pokerHandsCompareHightHandsHelpers__WEBPACK_IMPORTED_MODULE_1__.compareHighHandsHelpers.compareTwoPairHighCards(this.playersHands);
+          //console.log("Reached two pair check", this.playersHands);
+          // ToDo: Write the compare logic for 2 pair 
+          this.highestHand = this.compareTwoPairHighCards(this.playersHands);
           break;
 
         case "One pair":
           console.log("Reached one pair check");
-          this.highestHand = _helpers_pokerHandsCompareHightHandsHelpers__WEBPACK_IMPORTED_MODULE_1__.compareHighHandsHelpers.compareHighCards(this.playersHands);
+          this.highestHand = this.compareHighCards(this.playersHands);
           break;
 
         case "High card":
         default:
           console.log("Reached compare high cards check");
-          this.highestHand = _helpers_pokerHandsCompareHightHandsHelpers__WEBPACK_IMPORTED_MODULE_1__.compareHighHandsHelpers.compareHighCards(this.playersHands);
+          this.highestHand = this.compareHighCards(this.playersHands);
           break;
       }
     }
   }]);
 
   return compareHighHands;
-}();
+}(_helpers_pokerHandsCompareHightHandsHelpers__WEBPACK_IMPORTED_MODULE_1__.default);
 var getHandValue = /*#__PURE__*/function (_handChecks) {
   _inherits(getHandValue, _handChecks);
 
-  var _super = _createSuper(getHandValue);
+  var _super2 = _createSuper(getHandValue);
 
   function getHandValue(hand) {
-    var _this;
+    var _this2;
 
     _classCallCheck(this, getHandValue);
 
-    _this = _super.call(this);
-    _this.playersCards = hand;
-    _this.rank = {};
+    _this2 = _super2.call(this);
+    _this2.playersCards = hand;
+    _this2.rank = {};
 
-    _this.checkValue();
+    _this2.checkValue();
 
-    return _this;
+    return _this2;
   }
 
   _createClass(getHandValue, [{
@@ -2609,7 +2666,7 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
     }, {
       "id": 345543,
       "name": "grey",
-      "hand": ["DQ", "S9", "C10", "S6", "S4"]
+      "hand": ["DQ", "SQ", "C10", "C4", "S4"]
     }]
   },
   mutations: {
@@ -2690,29 +2747,25 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
                   matchingHighHands: matchingHighHands
                 });
 
-                if (matchingHighHands.length > 1) {
-                  //use service to loop through the matching high hands
-                  result = new _service_PokerHands__WEBPACK_IMPORTED_MODULE_2__.compareHighHands(matchingHighHands);
-                  console.log({
-                    result: result
-                  });
-                  rank = _objectSpread(_objectSpread({}, result.highestHand.handValue), {}, {
-                    type: "".concat(result.handType, " with a ").concat(result.highestHand.handValue.highCard.card, " high card")
-                  });
-                  commit('SET_HAND_RANK', {
-                    rank: rank,
-                    arrayId: result.highestHand.arrayIndex
-                  });
-                  commit('SET_WINNING_HAND', {
-                    playerId: result.highestHand.id
-                  });
-                } else {
-                  commit('SET_WINNING_HAND', {
-                    playerId: getters.sortHandsByRank[0].id
-                  }); ///console.log("Winning player id", getters.sortHandsByRank[0].id);
+                if (!(matchingHighHands.length > 1)) {
+                  _context.next = 16;
+                  break;
                 }
 
-              case 8:
+                //use service to loop through the matching high hands
+                result = new _service_PokerHands__WEBPACK_IMPORTED_MODULE_2__.compareHighHands(matchingHighHands);
+                console.log({
+                  result: result
+                }); //before creating the compare method, return out the rank and commit setup below...
+
+                return _context.abrupt("return");
+
+              case 16:
+                commit('SET_WINNING_HAND', {
+                  playerId: getters.sortHandsByRank[0].id
+                }); ///console.log("Winning player id", getters.sortHandsByRank[0].id);
+
+              case 17:
               case "end":
                 return _context.stop();
             }
