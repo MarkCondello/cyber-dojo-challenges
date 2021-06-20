@@ -2147,20 +2147,24 @@ var compareHighHandsHelpers = /*#__PURE__*/function () {
     value: function compareTwoPairHighCards() {
       var playersHighPairValuesSorted = _toConsumableArray(this.playersHands).sort(function (playerA, playerB) {
         return playerB.handValue.highCard[0].value - playerA.handValue.highCard[0].value;
-      }); //if there ate no mathching high cards from plauers return the high hand
+      }); //if there are no mathching high cards from plauers return the high hand
 
 
       if (playersHighPairValuesSorted[0].handValue.highCard[0].value === playersHighPairValuesSorted[1].handValue.highCard[0].value) {
-        var playersSecondPairValuesSorted = _toConsumableArray(playersHighPairValuesSorted).sort(function (playerA, playerB) {
+        //filter hands by top high card and sort by value
+        var playersSecondPairValuesFilteredAndSorted = _toConsumableArray(playersHighPairValuesSorted).filter(function (highHand) {
+          return highHand.handValue.highCard[0].value === playersHighPairValuesSorted[0].handValue.highCard[0].value;
+        }).sort(function (playerA, playerB) {
           return playerB.handValue.highCard[1].value - playerA.handValue.highCard[1].value;
         });
 
-        if (playersSecondPairValuesSorted[0].handValue.highCard[1].value === playersSecondPairValuesSorted[1].handValue.highCard[1].value) {// Split pot
+        if (playersSecondPairValuesFilteredAndSorted[0].handValue.highCard[1].value === playersSecondPairValuesFilteredAndSorted[1].handValue.highCard[1].value) {// Split pot
           //ToDo: loop
+          // ToDo: Work on this here
         } else {
-          this.kicker = playersSecondPairValuesSorted[0];
-        } // console.log({playersHighPairValuesSorted, playersHands: [...this.playersHands] })
-
+          // This is wrong
+          this.kicker = playersSecondPairValuesFilteredAndSorted[0]; // console.log({kicker: this.kicker})
+        }
       } else {
         return playersHighPairValuesSorted[0];
       }
@@ -2470,6 +2474,8 @@ var compareHighHands = /*#__PURE__*/function (_compareHighHandsHelp) {
     _this.highestHand = null;
     _this.kicker = null; //Add kicker value in for two pair
 
+    _this.splitPotPlayers = [];
+
     _this.getHandType();
 
     return _this;
@@ -2662,7 +2668,7 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
     }, {
       "id": 123321,
       "name": "white",
-      "hand": ["D8", "S8", "HK", "H2", "C2"]
+      "hand": ["HQ", "CQ", "SK", "H2", "C2"]
     }, {
       "id": 345543,
       "name": "grey",

@@ -18,3 +18,6 @@ straight flush DONE
 royal flush DONE
 
 If players have the same hand, we need a check for higher value.
+If players have the same hand and same value, we need to provide a split pot.
+
+Include fontawesome to display the Suits

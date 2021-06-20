@@ -11,7 +11,7 @@ export default new Vuex.Store({
         players: [
             // Remove this after doing compare checks
             {"id": 987789, "name":"black","hand":["S9","H9","C4","H6","D6"]},
-            {"id": 123321, "name":"white","hand":["D8","S8","HK","H2","C2"]},
+            {"id": 123321, "name":"white","hand":["HQ","CQ","SK","H2","C2"]},
             {"id": 345543, "name":"grey","hand":["DQ","SQ","C10","C4","S4"]}
         ],
     },

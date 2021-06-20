@@ -8,6 +8,7 @@ export class compareHighHands extends compareHighHandsHelpers{
       this.handType = null;
       this.highestHand = null;
       this.kicker = null; //Add kicker value in for two pair
+      this.splitPotPlayers = [];
       this.getHandType();
    }
    getHandType(){
