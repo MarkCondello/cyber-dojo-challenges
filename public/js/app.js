@@ -2273,7 +2273,11 @@ var HandChecks = /*#__PURE__*/function () {
   _createClass(HandChecks, [{
     key: "highCard",
     value: function highCard() {
-      return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(_toConsumableArray(this.playersCards)).pop();
+      return this.rank = {
+        value: 9,
+        type: "High card",
+        highCard: _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(_toConsumableArray(this.playersCards)).pop()
+      };
     }
   }, {
     key: "singlePair",
@@ -2281,7 +2285,11 @@ var HandChecks = /*#__PURE__*/function () {
       var pairs = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.pairsCheck(_toConsumableArray(this.playersCards));
 
       if (pairs.length === 1) {
-        return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardsValues(pairs).pop();
+        return this.rank = {
+          value: 8,
+          type: "One pair",
+          highCard: _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardsValues(pairs).pop()
+        };
       }
 
       return false;
@@ -2292,7 +2300,11 @@ var HandChecks = /*#__PURE__*/function () {
       var pairs = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.pairsCheck(_toConsumableArray(this.playersCards));
 
       if (pairs.length === 2) {
-        return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(pairs, 'desc');
+        return this.rank = {
+          value: 7,
+          type: "Two pairs",
+          highCard: _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(pairs, 'desc')
+        };
       }
 
       return false;
@@ -2313,13 +2325,25 @@ var HandChecks = /*#__PURE__*/function () {
           if (thirdRes.length < 3) {
             return false;
           } else {
-            return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(thirdRes, 'desc').pop();
+            return this.rank = {
+              value: 6,
+              type: "Three of a kind",
+              highCard: _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(thirdRes, 'desc').pop()
+            };
           }
         } else {
-          return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(secondRes, 'desc').pop();
+          return this.rank = {
+            value: 6,
+            type: "Three of a kind",
+            highCard: _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(secondRes, 'desc').pop()
+          };
         }
       } else {
-        return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(firstRes, 'desc').pop();
+        return this.rank = {
+          value: 6,
+          type: "Three of a kind",
+          highCard: _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(firstRes, 'desc').pop()
+        };
       }
     }
   }, {
@@ -2344,7 +2368,11 @@ var HandChecks = /*#__PURE__*/function () {
 
       if (isAceLowStraight) {
         // checkForAceBottomStraight
-        return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(cards, 'desc')[0];
+        return this.rank = {
+          value: 5,
+          type: "Straight",
+          highCard: _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(cards, 'dec')[0]
+        };
       } else if (firstSortedItemValue < 11) {
         //else if check firstSortedItemValue < 11
         var firstOrderedCard = heirarchyOfCards.find(function (card) {
@@ -2354,10 +2382,14 @@ var HandChecks = /*#__PURE__*/function () {
             splicedHeirarchyOfCardsFromFirstCardIndex = [].concat(heirarchyOfCards).splice(firstOrderedCardIndex, 5),
             isAStraight = itemsSorted.filter(function (item, index) {
           return item.value === splicedHeirarchyOfCardsFromFirstCardIndex[index];
-        }).length === 5; // console.log({isAStraight, itemsSorted, splicedHeirarchyOfCardsFromFirstCardIndex, })
+        }).length === 5;
 
         if (isAStraight) {
-          return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(cards, 'dec')[0];
+          return this.rank = {
+            value: 5,
+            type: "Straight",
+            highCard: _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(cards, 'dec')[0]
+          };
         } else {
           return false;
         }
@@ -2371,7 +2403,11 @@ var HandChecks = /*#__PURE__*/function () {
       var cards = _toConsumableArray(this.playersCards);
 
       if (_pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardMatches(_toConsumableArray(cards), 0).length === 5) {
-        return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(cards).pop();
+        return this.rank = {
+          value: 4,
+          type: "Flush",
+          highCard: _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(cards).pop()
+        };
       }
 
       return false;
@@ -2379,7 +2415,6 @@ var HandChecks = /*#__PURE__*/function () {
   }, {
     key: "bookCheck",
     value: function bookCheck() {
-      // console.log("reached book check")
       var hasTrips = this.tripsCheck();
 
       if (hasTrips) {
@@ -2391,9 +2426,13 @@ var HandChecks = /*#__PURE__*/function () {
 
         if (filteredTripsOut[0][1] === filteredTripsOut[1][1]) {
           // check the remaining cards are matching
-          return {
-            trips: hasTrips,
-            pair: _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardsValues([filteredTripsOut[0]])[0]
+          return this.rank = {
+            value: 3,
+            type: "Full House",
+            highCard: {
+              trips: hasTrips,
+              pair: _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardsValues([filteredTripsOut[0]])[0]
+            }
           };
         }
       }
@@ -2412,10 +2451,18 @@ var HandChecks = /*#__PURE__*/function () {
         if (secondRes.length < 4) {
           return false;
         } else {
-          return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(secondRes, 'desc').shift();
+          return this.rank = {
+            value: 2,
+            type: "Four of a kind",
+            highCard: _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(secondRes, 'desc').shift()
+          };
         }
       } else {
-        return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(firstRes, 'desc').shift();
+        return this.rank = {
+          value: 2,
+          type: "Four of a kind",
+          highCard: _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(firstRes, 'desc').shift()
+        };
       }
     }
   }, {
@@ -2424,7 +2471,12 @@ var HandChecks = /*#__PURE__*/function () {
       var straightCheck = this.straightCheck(this.playersCards);
 
       if (straightCheck && this.flushCheck(this.playersCards)) {
-        return straightCheck;
+        // ToDo: Add in a sort by value for high card
+        return this.rank = {
+          value: 1,
+          type: "Straight Flush",
+          highCard: this.playersCards
+        };
       }
     }
   }, {
@@ -2433,7 +2485,11 @@ var HandChecks = /*#__PURE__*/function () {
       var firstCardsValue = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(_toConsumableArray(this.playersCards))[0].value;
 
       if (firstCardsValue === 10 && this.straightCheck(this.playersCards) && this.flushCheck(this.playersCards)) {
-        return this.playersCards;
+        return this.rank = {
+          value: 0,
+          type: "Royal Flush",
+          highCard: this.playersHighHands
+        };
       }
     }
   }]);
@@ -2548,9 +2604,9 @@ var compareHighHands = /*#__PURE__*/function (_compareHighHandsHelp) {
           this.splitPotHands = this.playersHighHands;
           break;
 
-        case "Straight Flush":
-          console.log("Straight Flush");
-          this.compareHighCards(this.playersHighHands);
+        case "Two pairs":
+          console.log("Reached two pair check");
+          this.compareTwoPairHighCards(this.playersHighHands);
           break;
 
         case "Full House":
@@ -2558,34 +2614,14 @@ var compareHighHands = /*#__PURE__*/function (_compareHighHandsHelp) {
           this.compareFullHouseCards(this.playersHighHands);
           break;
 
+        case "Straight Flush":
         case "Flush":
-          console.log("Reached Flush check");
-          this.compareHighCards(this.playersHighHands);
-          break;
-
         case "Straight":
-          console.log("Reached straight check");
-          this.compareHighCards(this.playersHighHands);
-          break;
-
         case "Three of a kind":
-          console.log("Reached three of a kind check");
-          this.compareHighCards(this.playersHighHands);
-          break;
-
-        case "Two pairs":
-          console.log("Reached two pair check");
-          this.compareTwoPairHighCards(this.playersHighHands);
-          break;
-
         case "One pair":
-          console.log("Reached one pair check");
-          this.compareHighCards(this.playersHighHands);
-          break;
-
         case "High card":
         default:
-          console.log("Reached compare high cards check");
+          console.log("Reached compare high hands check");
           this.compareHighCards(this.playersHighHands);
           break;
       }
@@ -2616,67 +2652,7 @@ var getHandValue = /*#__PURE__*/function (_handChecks) {
   _createClass(getHandValue, [{
     key: "checkValue",
     value: function checkValue() {
-      if (this.royalFlushCheck(this.playersCards)) {
-        return this.rank = {
-          value: 0,
-          type: "Royal Flush",
-          highCard: this.royalFlushCheck(this.playersHighHands)
-        };
-      } else if (this.straightFlushCheck(this.playersCards)) {
-        return this.rank = {
-          value: 1,
-          type: "Straight Flush",
-          highCard: this.straightFlushCheck(this.playersCards)
-        };
-      } else if (this.quadsCheck(this.playersCards)) {
-        return this.rank = {
-          value: 2,
-          type: "Four of a kind",
-          highCard: this.quadsCheck(this.playersCards)
-        };
-      } else if (this.bookCheck(this.playersCards)) {
-        return this.rank = {
-          value: 3,
-          type: "Full House",
-          highCard: this.bookCheck(this.playersCards)
-        };
-      } else if (this.flushCheck(this.playersCards)) {
-        return this.rank = {
-          value: 4,
-          type: "Flush",
-          highCard: this.flushCheck(this.playersCards)
-        };
-      } else if (this.straightCheck(this.playersCards)) {
-        return this.rank = {
-          value: 5,
-          type: "Straight",
-          highCard: this.straightCheck(this.playersCards)
-        };
-      } else if (this.tripsCheck(this.playersCards)) {
-        return this.rank = {
-          value: 6,
-          type: "Three of a kind",
-          highCard: this.tripsCheck(this.playersCards)
-        };
-      } else if (this.twoPair(this.playersCards)) {
-        return this.rank = {
-          value: 7,
-          type: "Two pairs",
-          highCard: this.twoPair(this.playersCards)
-        };
-      } else if (this.singlePair(this.playersCards)) {
-        return this.rank = {
-          value: 8,
-          type: "One pair",
-          highCard: this.singlePair(this.playersCards)
-        };
-      } else {
-        return this.rank = {
-          value: 9,
-          type: "High card",
-          highCard: this.highCard(this.playersCards)
-        };
-      }
+      if (this.royalFlushCheck(this.playersCards)) {} else if (this.straightFlushCheck(this.playersCards)) {} else if (this.quadsCheck(this.playersCards)) {} else if (this.bookCheck(this.playersCards)) {} else if (this.flushCheck(this.playersCards)) {} else if (this.straightCheck(this.playersCards)) {} else if (this.tripsCheck(this.playersCards)) {} else if (this.twoPair(this.playersCards)) {} else if (this.singlePair(this.playersCards)) {} else if (this.highCard(this.playersCards)) {}
     }
   }]);
 
