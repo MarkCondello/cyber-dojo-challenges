@@ -1,4 +1,3 @@
-import { first, forEach } from "lodash";
 import Vue from "vue";
 import Vuex from 'vuex';
 import {deck, getHandValue, compareHighHands} from "../service/PokerHands";
@@ -10,9 +9,10 @@ export default new Vuex.Store({
         deck,
         players: [
             // Remove this after doing compare checks
-            {"id": 987789, "name":"black","hand":["S9","H9","C4","H6","D6"]},
-            {"id": 123321, "name":"white","hand":["HQ","CQ","SK","H2","C2"]},
-            {"id": 345543, "name":"grey","hand":["DQ","SQ","C10","C4","S4"]}
+            {"id": 987789, "name":"black","hand":["S3","S4","S5","S6","S2"]},
+            {"id": 123321, "name":"white","hand":["C7","C6","C5","C4","C3"]},
+            {"id": 345543, "name":"grey","hand":["H5","H6","H7","H8","H9"]},
+            {"id": 345543, "name":"red","hand":["D5","H6","H7","H8","H4"]},
         ],
     },
     mutations: {
@@ -31,7 +31,8 @@ export default new Vuex.Store({
         SET_WINNING_HAND(state, {playerId}){
             let winnerIndex = state.players.findIndex(player => player.id === playerId);
             state.players[winnerIndex].winner = true;
-        }
+        },
+
     },
     actions: {
         addPlayers({commit}, {players}){
@@ -54,32 +55,33 @@ export default new Vuex.Store({
         async winningHand(
             {state, commit, getters},
             ){
-
             await state.players.forEach((player, arrayId)=>{
                 let rank = new getHandValue(player.hand).rank;
                 commit('SET_HAND_RANK', {rank, arrayId}); 
             });
-
+            //ToDo: need to sort the players card ranks
             let matchingHighHands = await getters.matchingHighHands;
-
-            console.log({matchingHighHands})
             if(matchingHighHands.length > 1 ) {
                 //use service to loop through the matching high hands
-                let result = new compareHighHands(matchingHighHands);
-                console.log({result});
-                //before creating the compare method, return out the rank and commit setup below...
-                return;
-                let rank = { ...result.highestHand.handValue, 
-                    type: `${result.handType} with a ${result.highestHand.handValue.highCard.card} high card`,
+                let gameResult = new compareHighHands(matchingHighHands);
+                console.log({gameResult});
+
+                if(gameResult.splitPotHands.length){
+                    //ToDo: update the split pot hands with a splitPot flag
+                } else {
+                    //before creating the compare method, return out the rank and commit setup below...
+                     let rank = { ...gameResult.highestHand.handValue, 
+                        type: `${gameResult.handType} with a ${gameResult.highestHand.handValue.highCard.card} high card`,
+                    }
+                    commit('SET_HAND_RANK', {rank, arrayId: gameResult.highestHand.arrayIndex}); 
+                    commit('SET_WINNING_HAND', { playerId : gameResult.highestHand.id })
                 }
-                commit('SET_HAND_RANK', {rank, arrayId: result.highestHand.arrayIndex}); 
-                commit('SET_WINNING_HAND', { playerId : result.highestHand.id })
             } else {
+                console.log("reached set winning hand...")
                 commit('SET_WINNING_HAND', { playerId : getters.sortHandsByRank[0].id })
                 ///console.log("Winning player id", getters.sortHandsByRank[0].id);
             }
         },
-
     },
     getters: {
         remainingCardsCount: state => {

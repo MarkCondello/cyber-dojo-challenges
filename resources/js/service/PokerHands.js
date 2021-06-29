@@ -4,34 +4,62 @@ import compareHighHandsHelpers from '../helpers/pokerHandsCompareHightHandsHelpe
 export class compareHighHands extends compareHighHandsHelpers{
    constructor(hands){
       super();
-      this.playersHands = [...hands];
+      this.playersHighHands = [...hands];
       this.handType = null;
       this.highestHand = null;
       this.kicker = null; //Add kicker value in for two pair
-      this.splitPotPlayers = [];
+      this.splitPotHands = [];
       this.getHandType();
    }
    getHandType(){
-      //   console.log({'playersHands': this.playersHands})
-      this.handType = this.playersHands[0].handValue.type;
+      this.handType = this.playersHighHands[0].handValue.type;
       this.checkValue();
+   }
+   getWinningHandIndex(){
+      if(this.highestHand){
+         return this.playersHighHands.findIndex(hand => hand.id === this.highestHand.id)
+      }
+      return;
    }
    checkValue(){
       switch(this.handType){
+         // ToDo: these cases can be condensed, the logic is the same
+         case "Royal Flush":
+            console.log("Royal Flush");
+            this.splitPotHands = this.playersHighHands;
+            break;
+         case "Straight Flush":
+            console.log("Straight Flush");
+            this.compareHighCards(this.playersHighHands);
+            break;
+         case "Full House":
+            console.log("Reached Full House check");
+            this.compareFullHouseCards(this.playersHighHands);
+            break;
+         case "Flush":
+            console.log("Reached Flush check");
+            this.compareHighCards(this.playersHighHands);
+            break;
+         case "Straight":
+            console.log("Reached straight check");
+            this.compareHighCards(this.playersHighHands);
+            break;
+         case "Three of a kind":
+            console.log("Reached three of a kind check");
+            this.compareHighCards(this.playersHighHands);
+            break;
          case "Two pairs":
-            //console.log("Reached two pair check", this.playersHands);
-
-            // ToDo: Write the compare logic for 2 pair 
-            this.highestHand = this.compareTwoPairHighCards(this.playersHands);
+            console.log("Reached two pair check");
+            this.compareTwoPairHighCards(this.playersHighHands);
             break;
          case "One pair":
             console.log("Reached one pair check");
-            this.highestHand = this.compareHighCards(this.playersHands);
+            this.compareHighCards(this.playersHighHands);
             break;
          case "High card":
          default :
             console.log("Reached compare high cards check");
-            this.highestHand = this.compareHighCards(this.playersHands);
+            this.compareHighCards(this.playersHighHands);
             break
       }
    }
@@ -41,35 +69,31 @@ export class getHandValue extends handChecks{
    constructor(hand){
       super();
       this.playersCards = hand;
-      this.rank = {};
+      this.rank = null;
       this.checkValue();
    }
-   updateRank(rankObj){
-      this.rank = rankObj;
-   }
+ 
    checkValue(){
-      if( this.royalFlushCheck(this.playersCards)){
-         return this.updateRank({value: 0, type: "Royal Flush"});
+      if(this.royalFlushCheck(this.playersCards)){
+         return this.rank = {value: 0, type: "Royal Flush", highCard: this.royalFlushCheck(this.playersHighHands)};
       } else if(this.straightFlushCheck(this.playersCards)){
-         return this.updateRank({value: 1, type: "Straight Flush"});
+         return this.rank = {value: 1, type: "Straight Flush", highCard: this.straightFlushCheck(this.playersCards)};
       } else if(this.quadsCheck(this.playersCards)){
-         return this.updateRank({value: 2, type: "Four of a kind"});
+         return this.rank = {value: 2, type: "Four of a kind", highCard: this.quadsCheck(this.playersCards)};
       } else if (this.bookCheck(this.playersCards)){
-         return this.updateRank({value: 3, type: "Full House"});
+         return this.rank = {value: 3, type: "Full House", highCard: this.bookCheck(this.playersCards)};
       } else if(this.flushCheck(this.playersCards)){
-         return this.updateRank({value: 4, type: "Flush"});
+         return this.rank = {value: 4, type: "Flush", highCard: this.flushCheck(this.playersCards)};
       } else if(this.straightCheck(this.playersCards)){
-         return this.updateRank({value: 5, type: "Straight"});
+         return this.rank = {value: 5, type: "Straight", highCard: this.straightCheck(this.playersCards)};
       } else if (this.tripsCheck(this.playersCards)){
-         return this.updateRank({value: 6, type: "Three of a kind"});
-
+         return this.rank = {value: 6, type: "Three of a kind", highCard: this.tripsCheck(this.playersCards)};
       } else if (this.twoPair(this.playersCards)){
-         return this.updateRank({value: 7, type: "Two pairs", highCard: this.twoPair(this.playersCards)});
-
-      } else if(this.singlePair(this.playersCards)){         
-         return this.updateRank({value: 8, type: "One pair", highCard: this.singlePair(this.playersCards) });
+         return this.rank = {value: 7, type: "Two pairs", highCard: this.twoPair(this.playersCards)};
+      } else if(this.singlePair(this.playersCards)){   
+         return this.rank = {value: 8, type: "One pair", highCard: this.singlePair(this.playersCards) };
       } else {
-         return this.updateRank({value: 9, type: "High card",  highCard: this.highCard(this.playersCards) });
+         return this.rank = {value: 9, type: "High card",  highCard: this.highCard(this.playersCards) };
       }
    }
 }

@@ -6,10 +6,11 @@ export default class HandChecks {
     }
 
     singlePair(){
-        let pairs = helpers.pairsCheck([...this.playersCards])
+        let pairs = helpers.pairsCheck([...this.playersCards]);
         if(pairs.length === 1) {
             return helpers.getCardsValues(pairs).pop();   
         }
+        return false;
     }
 
     twoPair(){
@@ -17,34 +18,29 @@ export default class HandChecks {
         if(pairs.length === 2){
            return helpers.sortCardsByValues(pairs, 'desc');
         }
+        return false;
     }
 
     tripsCheck(){
         let cards = [...this.playersCards],
-        firstRes = helpers.getCardMatches(cards, 1);
-        // console.log("First Card Loop", {cards});
-
+        firstRes = helpers.getCardMatches(cards, 1); // first card gets spliced which mutates the cards array and is used for other checks
+ 
         if (firstRes.length < 3){
-            //console.log("TRIPs Second Card Loop", {cards});
             let secondRes = helpers.getCardMatches(cards, 1); //if firstRes.length < 4, run check again with the shortened array
             if(secondRes.length < 3){
-                // console.log("Third Card Loop", {cards});
                 let thirdRes = helpers.getCardMatches(cards, 1); //if firstRes.length < 4, run check again with the shortened array
                 if(thirdRes.length < 3){
                     return false;
                 } else {
-                    return true; //thirdRes;  
+                    return helpers.sortCardsByValues(thirdRes, 'desc').pop(); 
                 }
             } else {
-                return true;//secondRes; 
+                return helpers.sortCardsByValues(secondRes, 'desc').pop(); 
             }
         } else {
-            return true;//firstRes;  
+            return helpers.sortCardsByValues(firstRes, 'desc').pop();  
         }
     }
-    // let playersCards  = [ "D2", "S3", "H7", "C1", "H2"];
-    // let tripsCheckRes = tripsCheck(playersCards);
-    // console.log(tripsCheckRes);
 
     straightCheck(){
         let cards = [...this.playersCards],
@@ -62,7 +58,7 @@ export default class HandChecks {
     
         let isAceLowStraight = itemsSorted.filter((item, index) => item.value === aceLowStraightRef[index]).length === 5;
         if(isAceLowStraight) {  // checkForAceBottomStraight
-            return true
+            return helpers.sortCardsByValues(cards, 'desc')[0];
         } else if(firstSortedItemValue < 11 ) {   //else if check firstSortedItemValue < 11
             let firstOrderedCard = heirarchyOfCards.find(card => card === firstSortedItemValue),
             firstOrderedCardIndex = heirarchyOfCards.indexOf(firstOrderedCard),
@@ -70,7 +66,7 @@ export default class HandChecks {
             isAStraight = itemsSorted.filter((item, index) => item.value === splicedHeirarchyOfCardsFromFirstCardIndex[index]).length === 5;
         // console.log({isAStraight, itemsSorted, splicedHeirarchyOfCardsFromFirstCardIndex, })
             if(isAStraight){
-                return true;
+                return helpers.sortCardsByValues(cards, 'dec')[0];
             } else {
                 return false
             }
@@ -79,70 +75,57 @@ export default class HandChecks {
             return false
         }
     }
-    // let playersCards  = [ "SJ", "HJ", "CA", "HK", "DA"];
-    // let straightCheckRes = straightCheck(playersCards);
-    // console.log(straightCheckRes);
 
     flushCheck(){
         let cards = [...this.playersCards];
-        if(helpers.getCardMatches(cards, 0).length === 5){
-            return true; //firstRes;
+        if(helpers.getCardMatches([...cards], 0).length === 5){
+            return helpers.sortCardsByValues(cards).pop(); 
         } 
         return false;
     }
-    // let playersCards  = [ "D2", "D3", "DK", "D6", "DA"];
-    // let flushCheckRes = flushCheck(playersCards);
-    //  console.log(flushCheckRes);
 
     bookCheck(){
-        let has1Pair = this.singlePair(),
-        hasTrips = this.tripsCheck();
-
-        //console.log({hasTrips, has1Pair});
-        if(hasTrips && has1Pair){
-            return true;
+       // console.log("reached book check")
+        let hasTrips = this.tripsCheck();
+        if(hasTrips){
+            let tripsValue = hasTrips.card[1];            //remove items in the hand which match the trips value
+            let filteredTripsOut = [...this.playersCards].filter(card => card[1] !== tripsValue);
+            if(filteredTripsOut[0][1] === filteredTripsOut[1][1]){          // check the remaining cards are matching
+                return {
+                    trips: hasTrips,
+                    pair: helpers.getCardsValues([filteredTripsOut[0]])[0]
+                }
+            }
         }
         return false;
     }
-    //  let playersCards  = [ "D2", "H2", "S2", "D6", "S6"];
-    //  let bookCheckRes = bookCheck(playersCards);
-    //  console.log(bookCheckRes);
-
 
     quadsCheck(){
         let cards = [...this.playersCards],
         firstRes = helpers.getCardMatches(cards, 1);
         if (firstRes.length < 4){
             let secondRes = helpers.getCardMatches(cards, 1); //if firstRes.length < 4, run check again with the shortened array
-            if(secondRes.length < 4 ){
+            if(secondRes.length < 4){
                 return false;
             } else {
-                return true; //return secondRes;
+                return helpers.sortCardsByValues(secondRes, 'desc').shift();
             }
         } else {
-            return true; // return firstRes;
+            return helpers.sortCardsByValues(firstRes, 'desc').shift();
         }
     }
-    // let playersCards  = [ "D2", "S1", "H1", "C1", "D1"];
-    // let quadsCheckRes = quadsCheck(playersCards);
-    // console.log(quadsCheckRes);
 
     straightFlushCheck(){
-    //    console.log("S flush check", this.straightCheck(this.playersCards) &&  this.flushCheck(this.playersCards))
-        return this.straightCheck(this.playersCards) && this.flushCheck(this.playersCards)
-  
+        let straightCheck = this.straightCheck(this.playersCards);
+        if (straightCheck && this.flushCheck(this.playersCards)){
+            return straightCheck;
+        }
     }
-    // let playersCards  = [ "H10", "HJ", "HQ", "HK", "HA"];
-    // let straightFlushCheckRes = straightFlushCheck(playersCards);
-    // console.log(straightFlushCheckRes);
 
     royalFlushCheck(){
         let firstCardsValue = helpers.sortCardsByValues([...this.playersCards])[0].value;
-        // console.log("StraightFLush check: ", firstCardsValue === 10 && this.straightCheck(this.playersCards) && this.flushCheck(this.playersCards))
-        return (firstCardsValue === 10 && this.straightCheck(this.playersCards) && this.flushCheck(this.playersCards))
+        if (firstCardsValue === 10 && this.straightCheck(this.playersCards) && this.flushCheck(this.playersCards)){
+            return this.playersCards;
+        }
     }
-
-    // let playersCards = [ "H10", "HJ", "HQ", "HK", "HA"];
-    // let royalFlushCheckRes = royalFlushCheck(playersCards);
-    // console.log(royalFlushCheckRes);
 }

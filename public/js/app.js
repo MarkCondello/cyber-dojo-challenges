@@ -1886,7 +1886,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
-//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Poker-Hands",
@@ -1897,7 +1896,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     }
   },
   created: function created() {// Add this back in after testings
-    //this.addPlayers({players: this.playerItems});
+    // this.addPlayers({players: this.playerItems});
   },
   computed: _objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapState)(['players'])),
   methods: _objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapActions)(['dealCards', 'addPlayers', 'winningHand'])), {}, {
@@ -2012,12 +2011,18 @@ __webpack_require__.r(__webpack_exports__);
 var helpers = {
   pairsCheck: function pairsCheck(cards) {
     var pairs = [];
-    cards.forEach(function (card, index) {
+    cards.forEach(function (card, needleId) {
       var cardValue = card[1];
-      cards.forEach(function (key) {
+      cards.forEach(function (key, hayStackId) {
+        //console.log({key, card, key1: key[1], cardValue})
         if (key !== card && key[1] === cardValue) {
           pairs.push(card);
-          cards.splice(index, 1); //remove the card from the list
+          cards.splice(needleId, 1); //remove the card from the list
+
+          var matchIndex = cards.findIndex(function (item) {
+            return item === key;
+          });
+          cards.splice(matchIndex, 1); //remove the card from the list
         }
       });
     });
@@ -2077,13 +2082,13 @@ var helpers = {
   },
   // helper for 4 and 3 of a kind and flushes
   getCardMatches: function getCardMatches(cardsArr, index) {
-    var matches = [true],
-        //first item is always a match
-    cardValue = cardsArr.splice(0, 1)[0];
+    var cardValue = cardsArr.splice(0, 1)[0],
+        matches = [cardValue]; //first item is always a match
+
     cardsArr.forEach(function (card) {
       //console.log(card, cardValue);
       if (card[index] === cardValue[index]) {
-        matches.push(true);
+        matches.push(card);
       }
     });
     return matches;
@@ -2116,7 +2121,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ compareHighHandsHelpers)
 /* harmony export */ });
-/* harmony import */ var _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./pokerHandHelpers */ "./resources/js/helpers/pokerHandHelpers.js");
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -2135,19 +2139,47 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
- //ToDo: Need to know the high card for comparison of players with the same hand type
-
 var compareHighHandsHelpers = /*#__PURE__*/function () {
   function compareHighHandsHelpers() {
     _classCallCheck(this, compareHighHandsHelpers);
   }
 
   _createClass(compareHighHandsHelpers, [{
+    key: "compareFullHouseCards",
+    value: function compareFullHouseCards() {
+      var threeOfAKindHands = _toConsumableArray(this.playersHighHands).sort(function (playerA, playerB) {
+        return playerB.handValue.highCard.trips.value - playerA.handValue.highCard.trips.value;
+      }); //check if there is 2 hands with the same high three of a kind 
+
+
+      if (threeOfAKindHands[0].handValue.highCard.trips.value === threeOfAKindHands[1].handValue.highCard.trips.value) {
+        //I dont think that the pair check is needed as there can only be 1 three of a kind of any value which mean that the high trips in a book always wins; no need to check pair values
+        var twoOfAKindHands = _toConsumableArray(this.playersHighHands).sort(function (playerA, playerB) {
+          return playerB.handValue.highCard.pair.value - playerA.handValue.highCard.pair.valuex;
+        });
+
+        if (twoOfAKindHands[0].handValue.highCard.pair.value === twoOfAKindHands[1].handValue.highCard.pair.value) {
+          var highPairs = _toConsumableArray(twoOfAKindHands).filter(function (hand) {
+            return hand.handValue.highCard.pair.value === twoOfAKindHands[0].handValue.highCard.pair.value;
+          });
+
+          this.splitPotHands = highPairs;
+        } else {
+          this.highestHand = twoOfAKindHands[0]; //high pair
+
+          this.highestHand.arrayIndex = this.getWinningHandIndex();
+        }
+      } else {
+        this.highestHand = threeOfAKindHands[0];
+        this.highestHand.arrayIndex = this.getWinningHandIndex();
+      }
+    }
+  }, {
     key: "compareTwoPairHighCards",
     value: function compareTwoPairHighCards() {
-      var playersHighPairValuesSorted = _toConsumableArray(this.playersHands).sort(function (playerA, playerB) {
+      var playersHighPairValuesSorted = _toConsumableArray(this.playersHighHands).sort(function (playerA, playerB) {
         return playerB.handValue.highCard[0].value - playerA.handValue.highCard[0].value;
-      }); //if there are no mathching high cards from plauers return the high hand
+      }); //if there are no mathching high cards from players return the high hand
 
 
       if (playersHighPairValuesSorted[0].handValue.highCard[0].value === playersHighPairValuesSorted[1].handValue.highCard[0].value) {
@@ -2158,31 +2190,39 @@ var compareHighHandsHelpers = /*#__PURE__*/function () {
           return playerB.handValue.highCard[1].value - playerA.handValue.highCard[1].value;
         });
 
-        if (playersSecondPairValuesFilteredAndSorted[0].handValue.highCard[1].value === playersSecondPairValuesFilteredAndSorted[1].handValue.highCard[1].value) {// Split pot
-          //ToDo: loop
-          // ToDo: Work on this here
+        if (playersSecondPairValuesFilteredAndSorted[0].handValue.highCard[1].value === playersSecondPairValuesFilteredAndSorted[1].handValue.highCard[1].value) {
+          //if second players have same second hand split pot
+          var matchingSecondCardHands = _toConsumableArray(playersSecondPairValuesFilteredAndSorted).filter(function (highHand) {
+            return highHand.handValue.highCard[1].value === playersSecondPairValuesFilteredAndSorted[0].handValue.highCard[1].value;
+          });
+
+          this.splitPotHands = matchingSecondCardHands;
         } else {
-          // This is wrong
-          this.kicker = playersSecondPairValuesFilteredAndSorted[0]; // console.log({kicker: this.kicker})
+          this.kicker = playersSecondPairValuesFilteredAndSorted[0]; //return the hand with the high second card as kicker value
         }
       } else {
-        return playersHighPairValuesSorted[0];
+        this.highestHand = playersHighPairValuesSorted[0];
+        this.highestHand.arrayIndex = this.getWinningHandIndex();
       }
-    } // Check for the highest hand
-
+    }
   }, {
     key: "compareHighCards",
     value: function compareHighCards() {
-      //console.log({playersHighHands})
       var playersHighCardValuesSorted = _toConsumableArray(this.playersHighHands).sort(function (playerA, playerB) {
         return playerB.handValue.highCard.value - playerA.handValue.highCard.value;
       });
 
-      playersHighCardValuesSorted[0].arrayIndex = this.playersHighHands.findIndex(function (highHands) {
-        return highHands.id === playersHighCardValuesSorted[0].id;
-      }); // ToDo: Need a check for same high cards eg Split pot
+      if (playersHighCardValuesSorted[0].handValue.highCard.value === playersHighCardValuesSorted[1].handValue.highCard.value) {
+        var highCardHandsFiltered = _toConsumableArray(playersHighCardValuesSorted).filter(function (highHand) {
+          return highHand.handValue.highCard.value === playersHighCardValuesSorted[0].handValue.highCard.value;
+        });
 
-      return playersHighCardValuesSorted[0];
+        this.splitPotHands = highCardHandsFiltered;
+      } else {
+        //if there are no matching high cards from players return the high hand
+        this.highestHand = playersHighCardValuesSorted[0];
+        this.highestHand.arrayIndex = this.getWinningHandIndex();
+      }
     }
   }]);
 
@@ -2243,6 +2283,8 @@ var HandChecks = /*#__PURE__*/function () {
       if (pairs.length === 1) {
         return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardsValues(pairs).pop();
       }
+
+      return false;
     }
   }, {
     key: "twoPair",
@@ -2252,37 +2294,34 @@ var HandChecks = /*#__PURE__*/function () {
       if (pairs.length === 2) {
         return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(pairs, 'desc');
       }
+
+      return false;
     }
   }, {
     key: "tripsCheck",
     value: function tripsCheck() {
       var cards = _toConsumableArray(this.playersCards),
-          firstRes = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardMatches(cards, 1); // console.log("First Card Loop", {cards});
+          firstRes = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardMatches(cards, 1); // first card gets spliced which mutates the cards array and is used for other checks
 
 
       if (firstRes.length < 3) {
-        //console.log("TRIPs Second Card Loop", {cards});
         var secondRes = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardMatches(cards, 1); //if firstRes.length < 4, run check again with the shortened array
 
         if (secondRes.length < 3) {
-          // console.log("Third Card Loop", {cards});
           var thirdRes = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardMatches(cards, 1); //if firstRes.length < 4, run check again with the shortened array
 
           if (thirdRes.length < 3) {
             return false;
           } else {
-            return true; //thirdRes;  
+            return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(thirdRes, 'desc').pop();
           }
         } else {
-          return true; //secondRes; 
+          return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(secondRes, 'desc').pop();
         }
       } else {
-        return true; //firstRes;  
+        return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(firstRes, 'desc').pop();
       }
-    } // let playersCards  = [ "D2", "S3", "H7", "C1", "H2"];
-    // let tripsCheckRes = tripsCheck(playersCards);
-    // console.log(tripsCheckRes);
-
+    }
   }, {
     key: "straightCheck",
     value: function straightCheck() {
@@ -2305,7 +2344,7 @@ var HandChecks = /*#__PURE__*/function () {
 
       if (isAceLowStraight) {
         // checkForAceBottomStraight
-        return true;
+        return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(cards, 'desc')[0];
       } else if (firstSortedItemValue < 11) {
         //else if check firstSortedItemValue < 11
         var firstOrderedCard = heirarchyOfCards.find(function (card) {
@@ -2318,46 +2357,49 @@ var HandChecks = /*#__PURE__*/function () {
         }).length === 5; // console.log({isAStraight, itemsSorted, splicedHeirarchyOfCardsFromFirstCardIndex, })
 
         if (isAStraight) {
-          return true;
+          return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(cards, 'dec')[0];
         } else {
           return false;
         }
       } else {
         return false;
       }
-    } // let playersCards  = [ "SJ", "HJ", "CA", "HK", "DA"];
-    // let straightCheckRes = straightCheck(playersCards);
-    // console.log(straightCheckRes);
-
+    }
   }, {
     key: "flushCheck",
     value: function flushCheck() {
       var cards = _toConsumableArray(this.playersCards);
 
-      if (_pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardMatches(cards, 0).length === 5) {
-        return true; //firstRes;
+      if (_pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardMatches(_toConsumableArray(cards), 0).length === 5) {
+        return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(cards).pop();
       }
 
       return false;
-    } // let playersCards  = [ "D2", "D3", "DK", "D6", "DA"];
-    // let flushCheckRes = flushCheck(playersCards);
-    //  console.log(flushCheckRes);
-
+    }
   }, {
     key: "bookCheck",
     value: function bookCheck() {
-      var has1Pair = this.singlePair(),
-          hasTrips = this.tripsCheck(); //console.log({hasTrips, has1Pair});
+      // console.log("reached book check")
+      var hasTrips = this.tripsCheck();
 
-      if (hasTrips && has1Pair) {
-        return true;
+      if (hasTrips) {
+        var tripsValue = hasTrips.card[1]; //remove items in the hand which match the trips value
+
+        var filteredTripsOut = _toConsumableArray(this.playersCards).filter(function (card) {
+          return card[1] !== tripsValue;
+        });
+
+        if (filteredTripsOut[0][1] === filteredTripsOut[1][1]) {
+          // check the remaining cards are matching
+          return {
+            trips: hasTrips,
+            pair: _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardsValues([filteredTripsOut[0]])[0]
+          };
+        }
       }
 
       return false;
-    } //  let playersCards  = [ "D2", "H2", "S2", "D6", "S6"];
-    //  let bookCheckRes = bookCheck(playersCards);
-    //  console.log(bookCheckRes);
-
+    }
   }, {
     key: "quadsCheck",
     value: function quadsCheck() {
@@ -2370,34 +2412,30 @@ var HandChecks = /*#__PURE__*/function () {
         if (secondRes.length < 4) {
           return false;
         } else {
-          return true; //return secondRes;
+          return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(secondRes, 'desc').shift();
         }
       } else {
-        return true; // return firstRes;
+        return _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(firstRes, 'desc').shift();
       }
-    } // let playersCards  = [ "D2", "S1", "H1", "C1", "D1"];
-    // let quadsCheckRes = quadsCheck(playersCards);
-    // console.log(quadsCheckRes);
-
+    }
   }, {
     key: "straightFlushCheck",
     value: function straightFlushCheck() {
-      //    console.log("S flush check", this.straightCheck(this.playersCards) &&  this.flushCheck(this.playersCards))
-      return this.straightCheck(this.playersCards) && this.flushCheck(this.playersCards);
-    } // let playersCards  = [ "H10", "HJ", "HQ", "HK", "HA"];
-    // let straightFlushCheckRes = straightFlushCheck(playersCards);
-    // console.log(straightFlushCheckRes);
+      var straightCheck = this.straightCheck(this.playersCards);
 
+      if (straightCheck && this.flushCheck(this.playersCards)) {
+        return straightCheck;
+      }
+    }
   }, {
     key: "royalFlushCheck",
     value: function royalFlushCheck() {
-      var firstCardsValue = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(_toConsumableArray(this.playersCards))[0].value; // console.log("StraightFLush check: ", firstCardsValue === 10 && this.straightCheck(this.playersCards) && this.flushCheck(this.playersCards))
+      var firstCardsValue = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(_toConsumableArray(this.playersCards))[0].value;
 
-      return firstCardsValue === 10 && this.straightCheck(this.playersCards) && this.flushCheck(this.playersCards);
-    } // let playersCards = [ "H10", "HJ", "HQ", "HK", "HA"];
-    // let royalFlushCheckRes = royalFlushCheck(playersCards);
-    // console.log(royalFlushCheckRes);
-
+      if (firstCardsValue === 10 && this.straightCheck(this.playersCards) && this.flushCheck(this.playersCards)) {
+        return this.playersCards;
+      }
+    }
   }]);
 
   return HandChecks;
@@ -2469,12 +2507,12 @@ var compareHighHands = /*#__PURE__*/function (_compareHighHandsHelp) {
     _classCallCheck(this, compareHighHands);
 
     _this = _super.call(this);
-    _this.playersHands = _toConsumableArray(hands);
+    _this.playersHighHands = _toConsumableArray(hands);
     _this.handType = null;
     _this.highestHand = null;
     _this.kicker = null; //Add kicker value in for two pair
 
-    _this.splitPotPlayers = [];
+    _this.splitPotHands = [];
 
     _this.getHandType();
 
@@ -2484,29 +2522,71 @@ var compareHighHands = /*#__PURE__*/function (_compareHighHandsHelp) {
   _createClass(compareHighHands, [{
     key: "getHandType",
     value: function getHandType() {
-      //   console.log({'playersHands': this.playersHands})
-      this.handType = this.playersHands[0].handValue.type;
+      this.handType = this.playersHighHands[0].handValue.type;
       this.checkValue();
+    }
+  }, {
+    key: "getWinningHandIndex",
+    value: function getWinningHandIndex() {
+      var _this2 = this;
+
+      if (this.highestHand) {
+        return this.playersHighHands.findIndex(function (hand) {
+          return hand.id === _this2.highestHand.id;
+        });
+      }
+
+      return;
     }
   }, {
     key: "checkValue",
     value: function checkValue() {
       switch (this.handType) {
+        // ToDo: these cases can be condensed, the logic is the same
+        case "Royal Flush":
+          console.log("Royal Flush");
+          this.splitPotHands = this.playersHighHands;
+          break;
+
+        case "Straight Flush":
+          console.log("Straight Flush");
+          this.compareHighCards(this.playersHighHands);
+          break;
+
+        case "Full House":
+          console.log("Reached Full House check");
+          this.compareFullHouseCards(this.playersHighHands);
+          break;
+
+        case "Flush":
+          console.log("Reached Flush check");
+          this.compareHighCards(this.playersHighHands);
+          break;
+
+        case "Straight":
+          console.log("Reached straight check");
+          this.compareHighCards(this.playersHighHands);
+          break;
+
+        case "Three of a kind":
+          console.log("Reached three of a kind check");
+          this.compareHighCards(this.playersHighHands);
+          break;
+
         case "Two pairs":
-          //console.log("Reached two pair check", this.playersHands);
-          // ToDo: Write the compare logic for 2 pair 
-          this.highestHand = this.compareTwoPairHighCards(this.playersHands);
+          console.log("Reached two pair check");
+          this.compareTwoPairHighCards(this.playersHighHands);
           break;
 
         case "One pair":
           console.log("Reached one pair check");
-          this.highestHand = this.compareHighCards(this.playersHands);
+          this.compareHighCards(this.playersHighHands);
           break;
 
         case "High card":
         default:
           console.log("Reached compare high cards check");
-          this.highestHand = this.compareHighCards(this.playersHands);
+          this.compareHighCards(this.playersHighHands);
           break;
       }
     }
@@ -2520,80 +2600,82 @@ var getHandValue = /*#__PURE__*/function (_handChecks) {
   var _super2 = _createSuper(getHandValue);
 
   function getHandValue(hand) {
-    var _this2;
+    var _this3;
 
     _classCallCheck(this, getHandValue);
 
-    _this2 = _super2.call(this);
-    _this2.playersCards = hand;
-    _this2.rank = {};
+    _this3 = _super2.call(this);
+    _this3.playersCards = hand;
+    _this3.rank = null;
 
-    _this2.checkValue();
+    _this3.checkValue();
 
-    return _this2;
+    return _this3;
   }
 
   _createClass(getHandValue, [{
-    key: "updateRank",
-    value: function updateRank(rankObj) {
-      this.rank = rankObj;
-    }
-  }, {
     key: "checkValue",
     value: function checkValue() {
       if (this.royalFlushCheck(this.playersCards)) {
-        return this.updateRank({
+        return this.rank = {
           value: 0,
-          type: "Royal Flush"
-        });
+          type: "Royal Flush",
+          highCard: this.royalFlushCheck(this.playersHighHands)
+        };
       } else if (this.straightFlushCheck(this.playersCards)) {
-        return this.updateRank({
+        return this.rank = {
           value: 1,
-          type: "Straight Flush"
-        });
+          type: "Straight Flush",
+          highCard: this.straightFlushCheck(this.playersCards)
+        };
       } else if (this.quadsCheck(this.playersCards)) {
-        return this.updateRank({
+        return this.rank = {
           value: 2,
-          type: "Four of a kind"
-        });
+          type: "Four of a kind",
+          highCard: this.quadsCheck(this.playersCards)
+        };
       } else if (this.bookCheck(this.playersCards)) {
-        return this.updateRank({
+        return this.rank = {
           value: 3,
-          type: "Full House"
-        });
+          type: "Full House",
+          highCard: this.bookCheck(this.playersCards)
+        };
       } else if (this.flushCheck(this.playersCards)) {
-        return this.updateRank({
+        return this.rank = {
           value: 4,
-          type: "Flush"
-        });
+          type: "Flush",
+          highCard: this.flushCheck(this.playersCards)
+        };
       } else if (this.straightCheck(this.playersCards)) {
-        return this.updateRank({
+        return this.rank = {
           value: 5,
-          type: "Straight"
-        });
+          type: "Straight",
+          highCard: this.straightCheck(this.playersCards)
+        };
       } else if (this.tripsCheck(this.playersCards)) {
-        return this.updateRank({
+        return this.rank = {
           value: 6,
-          type: "Three of a kind"
-        });
+          type: "Three of a kind",
+          highCard: this.tripsCheck(this.playersCards)
+        };
       } else if (this.twoPair(this.playersCards)) {
-        return this.updateRank({
+        return this.rank = {
           value: 7,
           type: "Two pairs",
           highCard: this.twoPair(this.playersCards)
-        });
+        };
       } else if (this.singlePair(this.playersCards)) {
-        return this.updateRank({
+        return this.rank = {
           value: 8,
           type: "One pair",
           highCard: this.singlePair(this.playersCards)
-        });
+        };
       } else {
-        return this.updateRank({
+        return this.rank = {
           value: 9,
           type: "High card",
           highCard: this.highCard(this.playersCards)
-        });
+        };
       }
     }
   }]);
@@ -2623,11 +2705,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
-/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
-/* harmony import */ var _service_PokerHands__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../service/PokerHands */ "./resources/js/service/PokerHands.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+/* harmony import */ var _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../service/PokerHands */ "./resources/js/service/PokerHands.js");
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -2655,24 +2735,27 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 
 
-
-vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.default);
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new vuex__WEBPACK_IMPORTED_MODULE_4__.default.Store({
+vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.default);
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new vuex__WEBPACK_IMPORTED_MODULE_3__.default.Store({
   state: {
-    deck: _service_PokerHands__WEBPACK_IMPORTED_MODULE_2__.deck,
+    deck: _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.deck,
     players: [// Remove this after doing compare checks
     {
       "id": 987789,
       "name": "black",
-      "hand": ["S9", "H9", "C4", "H6", "D6"]
+      "hand": ["S3", "S4", "S5", "S6", "S2"]
     }, {
       "id": 123321,
       "name": "white",
-      "hand": ["HQ", "CQ", "SK", "H2", "C2"]
+      "hand": ["C7", "C6", "C5", "C4", "C3"]
     }, {
       "id": 345543,
       "name": "grey",
-      "hand": ["DQ", "SQ", "C10", "C4", "S4"]
+      "hand": ["H5", "H6", "H7", "H8", "H9"]
+    }, {
+      "id": 345543,
+      "name": "red",
+      "hand": ["D5", "H6", "H7", "H8", "H4"]
     }]
   },
   mutations: {
@@ -2728,7 +2811,7 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
     },
     winningHand: function winningHand(_ref7) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
-        var state, commit, getters, matchingHighHands, result, rank;
+        var state, commit, getters, matchingHighHands, gameResult, rank;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -2736,7 +2819,7 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
                 state = _ref7.state, commit = _ref7.commit, getters = _ref7.getters;
                 _context.next = 3;
                 return state.players.forEach(function (player, arrayId) {
-                  var rank = new _service_PokerHands__WEBPACK_IMPORTED_MODULE_2__.getHandValue(player.hand).rank;
+                  var rank = new _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.getHandValue(player.hand).rank;
                   commit('SET_HAND_RANK', {
                     rank: rank,
                     arrayId: arrayId
@@ -2749,29 +2832,36 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
 
               case 5:
                 matchingHighHands = _context.sent;
-                console.log({
-                  matchingHighHands: matchingHighHands
-                });
 
-                if (!(matchingHighHands.length > 1)) {
-                  _context.next = 16;
-                  break;
+                if (matchingHighHands.length > 1) {
+                  //use service to loop through the matching high hands
+                  gameResult = new _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.compareHighHands(matchingHighHands);
+                  console.log({
+                    gameResult: gameResult
+                  });
+
+                  if (gameResult.splitPotHands.length) {//ToDo: update the split pot hands with a splitPot flag
+                  } else {
+                    //before creating the compare method, return out the rank and commit setup below...
+                    rank = _objectSpread(_objectSpread({}, gameResult.highestHand.handValue), {}, {
+                      type: "".concat(gameResult.handType, " with a ").concat(gameResult.highestHand.handValue.highCard.card, " high card")
+                    });
+                    commit('SET_HAND_RANK', {
+                      rank: rank,
+                      arrayId: gameResult.highestHand.arrayIndex
+                    });
+                    commit('SET_WINNING_HAND', {
+                      playerId: gameResult.highestHand.id
+                    });
+                  }
+                } else {
+                  console.log("reached set winning hand...");
+                  commit('SET_WINNING_HAND', {
+                    playerId: getters.sortHandsByRank[0].id
+                  }); ///console.log("Winning player id", getters.sortHandsByRank[0].id);
                 }
 
-                //use service to loop through the matching high hands
-                result = new _service_PokerHands__WEBPACK_IMPORTED_MODULE_2__.compareHighHands(matchingHighHands);
-                console.log({
-                  result: result
-                }); //before creating the compare method, return out the rank and commit setup below...
-
-                return _context.abrupt("return");
-
-              case 16:
-                commit('SET_WINNING_HAND', {
-                  playerId: getters.sortHandsByRank[0].id
-                }); ///console.log("Winning player id", getters.sortHandsByRank[0].id);
-
-              case 17:
+              case 7:
               case "end":
                 return _context.stop();
             }

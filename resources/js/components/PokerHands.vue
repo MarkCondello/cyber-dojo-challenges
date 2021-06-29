@@ -1,8 +1,7 @@
 <template>
     <div>
         <template v-if="this.players">
-            <h1>POKER HANDS</h1>
-            <!-- should use a computed method to check each player has their hand -->
+            <h1>POKER HANDS</h1><!-- should use a computed method to check each player has their hand -->
             <template v-if="players[0].hand.length">
                 <button style="width: 100%;" @click.stop="handleGetWinner">Who wins?</button>
                 <div class="container">
@@ -32,10 +31,9 @@ export default {
             required: true,
         }
     },
-
     created() {
         // Add this back in after testings
-        //this.addPlayers({players: this.playerItems});
+        // this.addPlayers({players: this.playerItems});
     },
     computed: {
         ...mapState(['players']),
@@ -45,8 +43,7 @@ export default {
          handleGetWinner(){
             this.winningHand()
         }
-    }
-
+    },
 }
 </script>
 
