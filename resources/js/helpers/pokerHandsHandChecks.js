@@ -103,8 +103,7 @@ export default class HandChecks {
     straightFlushCheck(){
         let straightCheck = this.straightCheck(this.playersCards);
         if (straightCheck && this.flushCheck(this.playersCards)){
-            // ToDo: Add in a sort by value for high card
-            return this.rank = {value: 1, type: "Straight Flush", highCard: this.playersCards};
+            return this.rank = {value: 1, type: "Straight Flush", highCard: helpers.sortCardsByValues(this.playersCards, 'desc').shift() };
         }
     }
     royalFlushCheck(){

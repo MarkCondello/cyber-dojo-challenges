@@ -27,7 +27,6 @@ export default class compareHighHandsHelpers {
                 .sort((playerA, playerB) => playerB.handValue.highCard[1].value - playerA.handValue.highCard[1].value);
 
             if (playersSecondPairValuesFilteredAndSorted[0].handValue.highCard[1].value === playersSecondPairValuesFilteredAndSorted[1].handValue.highCard[1].value) { //if second players have same second hand split pot
-
                 let matchingSecondCardHands = [...playersSecondPairValuesFilteredAndSorted]
                     .filter(highHand => highHand.handValue.highCard[1].value === playersSecondPairValuesFilteredAndSorted[0].handValue.highCard[1].value);
                 this.splitPotHands = matchingSecondCardHands;

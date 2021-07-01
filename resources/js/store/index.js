@@ -10,10 +10,11 @@ export default new Vuex.Store({
         players: [
             // Remove this after doing compare checks
             {"id": 987789, "name":"black","hand":["S3","S4","S5","S6","S2"]},
-            {"id": 123321, "name":"white","hand":["C7","C6","C5","C4","C3"]},
+            {"id": 123321, "name":"white","hand":["C7","C6","C5","C8","C9"]},
             {"id": 345543, "name":"grey","hand":["H5","H6","H7","H8","H9"]},
             {"id": 345543, "name":"red","hand":["D5","H6","H7","H8","H4"]},
         ],
+        message: null,
     },
     mutations: {
         REMOVE_CARD(state, cardIndex){
@@ -25,13 +26,26 @@ export default new Vuex.Store({
         SET_PLAYERS_CARD(state, {arrayId, card}){
             state.players[arrayId].hand.push(card);
         },
-        SET_HAND_RANK(state, {arrayId, rank}){
+        SET_HAND_VALUE(state, {arrayId, rank}){
             state.players[arrayId].handValue = rank;
         },
         SET_WINNING_HAND(state, {playerId}){
             let winnerIndex = state.players.findIndex(player => player.id === playerId);
             state.players[winnerIndex].winner = true;
+            state.message = state.players[winnerIndex].handValue.message;
         },
+        SET_SPLIT_POT_HANDS(state, {playerIds, message}){
+            state.message = message;
+            console.log("SET_SPLIT_POT_HANDS", playerIds, message);
+
+            playerIds.forEach(playerId=>{
+                state.players.forEach((player, index) => {
+                    if(player.id === playerId){
+                        state.players[index].splitPotWinner = true;
+                    }
+                })
+            });
+        }
 
     },
     actions: {
@@ -57,28 +71,29 @@ export default new Vuex.Store({
             ){
             await state.players.forEach((player, arrayId)=>{
                 let rank = new getHandValue(player.hand).rank;
-                commit('SET_HAND_RANK', {rank, arrayId}); 
+                commit('SET_HAND_VALUE', {rank, arrayId}); 
             });
-            //ToDo: need to sort the players card ranks
             let matchingHighHands = await getters.matchingHighHands;
-            if(matchingHighHands.length > 1 ) {
-                //use service to loop through the matching high hands
+            if(matchingHighHands.length > 1 ) { //use service to loop through the matching high hands
                 let gameResult = new compareHighHands(matchingHighHands);
                 console.log({gameResult});
 
-                if(gameResult.splitPotHands.length){
-                    //ToDo: update the split pot hands with a splitPot flag
+                if(gameResult.splitPotHands.length){ //ToDo: update the split pot hands with a splitPot flag
+                    console.log('Reached split pot hands');
+                    let message = getters.splitPotMessage(gameResult.splitPotHands),
+                    playerIds = gameResult.splitPotHands.map(hand => hand.id);
+                    commit('SET_SPLIT_POT_HANDS', {message, playerIds})
                 } else {
-                    //before creating the compare method, return out the rank and commit setup below...
-                     let rank = { ...gameResult.highestHand.handValue, 
-                        type: `${gameResult.handType} with a ${gameResult.highestHand.handValue.highCard.card} high card`,
-                    }
-                    commit('SET_HAND_RANK', {rank, arrayId: gameResult.highestHand.arrayIndex}); 
+                    let rank = getters.winningHandMessage(gameResult.highestHand);
+                    await commit('SET_HAND_VALUE', {rank, arrayId: gameResult.highestHand.arrayIndex}); 
                     commit('SET_WINNING_HAND', { playerId : gameResult.highestHand.id })
                 }
             } else {
-                console.log("reached set winning hand...")
-                commit('SET_WINNING_HAND', { playerId : getters.sortHandsByRank[0].id })
+                let winningHand = getters.sortHandsByRank.shift(),
+                rank = getters.winningHandMessage(winningHand);
+                console.log("reached set winning hand...", winningHand, rank);
+                await commit('SET_HAND_VALUE', {rank, arrayId: winningHand.arrayIndex}); 
+                commit('SET_WINNING_HAND', { playerId : winningHand.id })
                 ///console.log("Winning player id", getters.sortHandsByRank[0].id);
             }
         },
@@ -101,7 +116,19 @@ export default new Vuex.Store({
             let sortedPlayersHands = getters.sortHandsByRank,
             firstHighestHand = sortedPlayersHands[0].handValue.value;
             return sortedPlayersHands.filter(player => player.handValue.value === firstHighestHand);
-
-         }
+        },
+        winningHandMessage: () => (hand) => {
+            //How does the kicker get displayed if it is set???
+            return { ...hand.handValue, 
+                message: `${hand.name} wins with a ${hand.handValue.type}, ${hand.handValue.highCard.card} high card.`,
+            }
+        },
+        splitPotMessage: () => (splitPotHands) => {
+            let names = [...splitPotHands].map(hand => hand.name),
+            firstHighCard = [...splitPotHands].shift();
+            return `Split pot for ${names}, with a ${firstHighCard.handValue.type} ${firstHighCard.handValue.highCard.value} high card.`
+            return message;
+            //will this work with full house and two pair split pots??? 
+        }
     },
 })

@@ -2471,11 +2471,10 @@ var HandChecks = /*#__PURE__*/function () {
       var straightCheck = this.straightCheck(this.playersCards);
 
       if (straightCheck && this.flushCheck(this.playersCards)) {
-        // ToDo: Add in a sort by value for high card
         return this.rank = {
           value: 1,
           type: "Straight Flush",
-          highCard: this.playersCards
+          highCard: _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(this.playersCards, 'desc').shift()
         };
       }
     }
@@ -2684,6 +2683,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
 /* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
 /* harmony import */ var _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../service/PokerHands */ "./resources/js/service/PokerHands.js");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -2697,12 +2702,6 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToAr
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 
-
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
@@ -2723,7 +2722,7 @@ vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.d
     }, {
       "id": 123321,
       "name": "white",
-      "hand": ["C7", "C6", "C5", "C4", "C3"]
+      "hand": ["C7", "C6", "C5", "C8", "C9"]
     }, {
       "id": 345543,
       "name": "grey",
@@ -2732,7 +2731,8 @@ vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.d
       "id": 345543,
       "name": "red",
       "hand": ["D5", "H6", "H7", "H8", "H4"]
-    }]
+    }],
+    message: null
   },
   mutations: {
     REMOVE_CARD: function REMOVE_CARD(state, cardIndex) {
@@ -2746,7 +2746,7 @@ vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.d
           card = _ref.card;
       state.players[arrayId].hand.push(card);
     },
-    SET_HAND_RANK: function SET_HAND_RANK(state, _ref2) {
+    SET_HAND_VALUE: function SET_HAND_VALUE(state, _ref2) {
       var arrayId = _ref2.arrayId,
           rank = _ref2.rank;
       state.players[arrayId].handValue = rank;
@@ -2757,18 +2757,32 @@ vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.d
         return player.id === playerId;
       });
       state.players[winnerIndex].winner = true;
+      state.message = state.players[winnerIndex].handValue.message;
+    },
+    SET_SPLIT_POT_HANDS: function SET_SPLIT_POT_HANDS(state, _ref4) {
+      var playerIds = _ref4.playerIds,
+          message = _ref4.message;
+      state.message = message;
+      console.log("SET_SPLIT_POT_HANDS", playerIds, message);
+      playerIds.forEach(function (playerId) {
+        state.players.forEach(function (player, index) {
+          if (player.id === playerId) {
+            state.players[index].splitPotWinner = true;
+          }
+        });
+      });
     }
   },
   actions: {
-    addPlayers: function addPlayers(_ref4, _ref5) {
-      var commit = _ref4.commit;
-      var players = _ref5.players;
+    addPlayers: function addPlayers(_ref5, _ref6) {
+      var commit = _ref5.commit;
+      var players = _ref6.players;
       commit("SET_PLAYERS", players);
     },
-    dealCards: function dealCards(_ref6) {
-      var state = _ref6.state,
-          commit = _ref6.commit,
-          getters = _ref6.getters;
+    dealCards: function dealCards(_ref7) {
+      var state = _ref7.state,
+          commit = _ref7.commit,
+          getters = _ref7.getters;
       var i = 0;
 
       while (i < 5) {
@@ -2785,18 +2799,19 @@ vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.d
         i++;
       }
     },
-    winningHand: function winningHand(_ref7) {
+    winningHand: function winningHand(_ref8) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
-        var state, commit, getters, matchingHighHands, gameResult, rank;
+        var state, commit, getters, matchingHighHands, gameResult, _message, playerIds, rank, winningHand, _rank;
+
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                state = _ref7.state, commit = _ref7.commit, getters = _ref7.getters;
+                state = _ref8.state, commit = _ref8.commit, getters = _ref8.getters;
                 _context.next = 3;
                 return state.players.forEach(function (player, arrayId) {
                   var rank = new _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.getHandValue(player.hand).rank;
-                  commit('SET_HAND_RANK', {
+                  commit('SET_HAND_VALUE', {
                     rank: rank,
                     arrayId: arrayId
                   });
@@ -2809,35 +2824,66 @@ vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.d
               case 5:
                 matchingHighHands = _context.sent;
 
-                if (matchingHighHands.length > 1) {
-                  //use service to loop through the matching high hands
-                  gameResult = new _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.compareHighHands(matchingHighHands);
-                  console.log({
-                    gameResult: gameResult
-                  });
-
-                  if (gameResult.splitPotHands.length) {//ToDo: update the split pot hands with a splitPot flag
-                  } else {
-                    //before creating the compare method, return out the rank and commit setup below...
-                    rank = _objectSpread(_objectSpread({}, gameResult.highestHand.handValue), {}, {
-                      type: "".concat(gameResult.handType, " with a ").concat(gameResult.highestHand.handValue.highCard.card, " high card")
-                    });
-                    commit('SET_HAND_RANK', {
-                      rank: rank,
-                      arrayId: gameResult.highestHand.arrayIndex
-                    });
-                    commit('SET_WINNING_HAND', {
-                      playerId: gameResult.highestHand.id
-                    });
-                  }
-                } else {
-                  console.log("reached set winning hand...");
-                  commit('SET_WINNING_HAND', {
-                    playerId: getters.sortHandsByRank[0].id
-                  }); ///console.log("Winning player id", getters.sortHandsByRank[0].id);
+                if (!(matchingHighHands.length > 1)) {
+                  _context.next = 21;
+                  break;
                 }
 
-              case 7:
+                //use service to loop through the matching high hands
+                gameResult = new _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.compareHighHands(matchingHighHands);
+                console.log({
+                  gameResult: gameResult
+                });
+
+                if (!gameResult.splitPotHands.length) {
+                  _context.next = 15;
+                  break;
+                }
+
+                //ToDo: update the split pot hands with a splitPot flag
+                console.log('Reached split pot hands');
+                _message = getters.splitPotMessage(gameResult.splitPotHands), playerIds = gameResult.splitPotHands.map(function (hand) {
+                  return hand.id;
+                });
+                commit('SET_SPLIT_POT_HANDS', {
+                  message: _message,
+                  playerIds: playerIds
+                });
+                _context.next = 19;
+                break;
+
+              case 15:
+                rank = getters.winningHandMessage(gameResult.highestHand);
+                _context.next = 18;
+                return commit('SET_HAND_VALUE', {
+                  rank: rank,
+                  arrayId: gameResult.highestHand.arrayIndex
+                });
+
+              case 18:
+                commit('SET_WINNING_HAND', {
+                  playerId: gameResult.highestHand.id
+                });
+
+              case 19:
+                _context.next = 26;
+                break;
+
+              case 21:
+                winningHand = getters.sortHandsByRank.shift(), _rank = getters.winningHandMessage(winningHand);
+                console.log("reached set winning hand...", winningHand, _rank);
+                _context.next = 25;
+                return commit('SET_HAND_VALUE', {
+                  rank: _rank,
+                  arrayId: winningHand.arrayIndex
+                });
+
+              case 25:
+                commit('SET_WINNING_HAND', {
+                  playerId: winningHand.id
+                }); ///console.log("Winning player id", getters.sortHandsByRank[0].id);
+
+              case 26:
               case "end":
                 return _context.stop();
             }
@@ -2870,6 +2916,25 @@ vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.d
       return sortedPlayersHands.filter(function (player) {
         return player.handValue.value === firstHighestHand;
       });
+    },
+    winningHandMessage: function winningHandMessage() {
+      return function (hand) {
+        //How does the kicker get displayed if it is set???
+        return _objectSpread(_objectSpread({}, hand.handValue), {}, {
+          message: "".concat(hand.name, " wins with a ").concat(hand.handValue.type, ", ").concat(hand.handValue.highCard.card, " high card.")
+        });
+      };
+    },
+    splitPotMessage: function splitPotMessage() {
+      return function (splitPotHands) {
+        var names = _toConsumableArray(splitPotHands).map(function (hand) {
+          return hand.name;
+        }),
+            firstHighCard = _toConsumableArray(splitPotHands).shift();
+
+        return "Split pot for ".concat(names, ", with a ").concat(firstHighCard.handValue.type, " ").concat(firstHighCard.handValue.highCard.value, " high card.");
+        return message; //will this work with full house and two pair split pots??? 
+      };
     }
   }
 }));
