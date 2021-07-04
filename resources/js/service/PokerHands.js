@@ -7,7 +7,6 @@ export class compareHighHands extends compareHighHandsHelpers{
       this.playersHighHands = [...hands];
       this.handType = null;
       this.highestHand = null;
-      this.kicker = null; //Add kicker value in for two pair
       this.splitPotHands = [];
       this.getHandType();
    }
@@ -17,13 +16,12 @@ export class compareHighHands extends compareHighHandsHelpers{
    }
    getWinningHandIndex(){
       if(this.highestHand){
-         return this.playersHighHands.findIndex(hand => hand.id === this.highestHand.id)
+         return this.playersHighHands.findIndex(hand => hand.id === this.highestHand.id);
       }
       return;
    }
    checkValue(){
       switch(this.handType){
-         // ToDo: these cases can be condensed, the logic is the same
          case "Royal Flush":
             console.log("Royal Flush");
             this.splitPotHands = this.playersHighHands;
@@ -40,7 +38,7 @@ export class compareHighHands extends compareHighHandsHelpers{
          case "Flush":
          case "Straight":
          case "Three of a kind":
-         case "One pair":
+         case "Pair":
          case "High card":
          default :
             console.log("Reached compare high hands check");

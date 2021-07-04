@@ -2198,10 +2198,13 @@ var compareHighHandsHelpers = /*#__PURE__*/function () {
 
           this.splitPotHands = matchingSecondCardHands;
         } else {
-          this.kicker = playersSecondPairValuesFilteredAndSorted[0]; //return the hand with the high second card as kicker value
+          this.highestHand = playersSecondPairValuesFilteredAndSorted[0];
+          this.highestHand.handValue.kicker = playersSecondPairValuesFilteredAndSorted[0].handValue.highCard[1]; //return the hand with the high second card as kicker value
+
+          this.highestHand.arrayIndex = this.getWinningHandIndex();
         }
       } else {
-        this.highestHand = playersHighPairValuesSorted[0];
+        this.highestHand = playersHighPairValuesSorted.shift();
         this.highestHand.arrayIndex = this.getWinningHandIndex();
       }
     }
@@ -2287,7 +2290,7 @@ var HandChecks = /*#__PURE__*/function () {
       if (pairs.length === 1) {
         return this.rank = {
           value: 8,
-          type: "One pair",
+          type: "Pair",
           highCard: _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.getCardsValues(pairs).pop()
         };
       }
@@ -2565,8 +2568,6 @@ var compareHighHands = /*#__PURE__*/function (_compareHighHandsHelp) {
     _this.playersHighHands = _toConsumableArray(hands);
     _this.handType = null;
     _this.highestHand = null;
-    _this.kicker = null; //Add kicker value in for two pair
-
     _this.splitPotHands = [];
 
     _this.getHandType();
@@ -2597,7 +2598,6 @@ var compareHighHands = /*#__PURE__*/function (_compareHighHandsHelp) {
     key: "checkValue",
     value: function checkValue() {
       switch (this.handType) {
-        // ToDo: these cases can be condensed, the logic is the same
         case "Royal Flush":
           console.log("Royal Flush");
           this.splitPotHands = this.playersHighHands;
@@ -2617,7 +2617,7 @@ var compareHighHands = /*#__PURE__*/function (_compareHighHandsHelp) {
         case "Flush":
         case "Straight":
         case "Three of a kind":
-        case "One pair":
+        case "Pair":
         case "High card":
         default:
           console.log("Reached compare high hands check");
@@ -2718,20 +2718,17 @@ vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.d
     {
       "id": 987789,
       "name": "black",
-      "hand": ["S3", "S4", "S5", "S6", "S2"]
+      "hand": ["S3", "S4", "S5", "DA", "SA"]
     }, {
       "id": 123321,
       "name": "white",
-      "hand": ["C7", "C6", "C5", "C8", "C9"]
+      "hand": ["C7", "D7", "C6", "S6", "C9"]
     }, {
       "id": 345543,
       "name": "grey",
-      "hand": ["H5", "H6", "H7", "H8", "H9"]
-    }, {
-      "id": 345543,
-      "name": "red",
-      "hand": ["D5", "H6", "H7", "H8", "H4"]
-    }],
+      "hand": ["H5", "H6", "H7", "S6", "D7"]
+    } // {"id": 345543, "name":"red","hand":["D5","H6","H7","H8","H4"]},
+    ],
     message: null
   },
   mutations: {
@@ -2750,20 +2747,22 @@ vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.d
       var arrayId = _ref2.arrayId,
           rank = _ref2.rank;
       state.players[arrayId].handValue = rank;
+      console.log("SET HAND VAL:", state.players[arrayId].handValue);
     },
     SET_WINNING_HAND: function SET_WINNING_HAND(state, _ref3) {
-      var playerId = _ref3.playerId;
+      var playerId = _ref3.playerId,
+          message = _ref3.message;
       var winnerIndex = state.players.findIndex(function (player) {
         return player.id === playerId;
       });
       state.players[winnerIndex].winner = true;
-      state.message = state.players[winnerIndex].handValue.message;
+      console.log("winning hand message: ", state.players[winnerIndex].handValue);
+      state.message = message; // state.message = state.players[winnerIndex].handValue.message;
     },
     SET_SPLIT_POT_HANDS: function SET_SPLIT_POT_HANDS(state, _ref4) {
       var playerIds = _ref4.playerIds,
           message = _ref4.message;
       state.message = message;
-      console.log("SET_SPLIT_POT_HANDS", playerIds, message);
       playerIds.forEach(function (playerId) {
         state.players.forEach(function (player, index) {
           if (player.id === playerId) {
@@ -2801,27 +2800,24 @@ vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.d
     },
     winningHand: function winningHand(_ref8) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
-        var state, commit, getters, matchingHighHands, gameResult, _message, playerIds, rank, winningHand, _rank;
+        var state, commit, getters, matchingHighHands, gameResult, message, playerIds, rank, winningHand, arrayId, _rank;
 
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
                 state = _ref8.state, commit = _ref8.commit, getters = _ref8.getters;
-                _context.next = 3;
-                return state.players.forEach(function (player, arrayId) {
+                state.players.forEach(function (player, arrayId) {
                   var rank = new _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.getHandValue(player.hand).rank;
                   commit('SET_HAND_VALUE', {
                     rank: rank,
                     arrayId: arrayId
                   });
                 });
-
-              case 3:
-                _context.next = 5;
+                _context.next = 4;
                 return getters.matchingHighHands;
 
-              case 5:
+              case 4:
                 matchingHighHands = _context.sent;
 
                 if (!(matchingHighHands.length > 1)) {
@@ -2831,59 +2827,74 @@ vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.d
 
                 //use service to loop through the matching high hands
                 gameResult = new _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.compareHighHands(matchingHighHands);
-                console.log({
+                console.log("Matcing high hands check", {
                   gameResult: gameResult
                 });
 
                 if (!gameResult.splitPotHands.length) {
-                  _context.next = 15;
+                  _context.next = 14;
                   break;
                 }
 
                 //ToDo: update the split pot hands with a splitPot flag
                 console.log('Reached split pot hands');
-                _message = getters.splitPotMessage(gameResult.splitPotHands), playerIds = gameResult.splitPotHands.map(function (hand) {
+                message = getters.splitPotMessage(gameResult.splitPotHands), playerIds = gameResult.splitPotHands.map(function (hand) {
                   return hand.id;
                 });
                 commit('SET_SPLIT_POT_HANDS', {
-                  message: _message,
+                  message: message,
                   playerIds: playerIds
                 });
                 _context.next = 19;
                 break;
 
-              case 15:
-                rank = getters.winningHandMessage(gameResult.highestHand);
-                _context.next = 18;
-                return commit('SET_HAND_VALUE', {
+              case 14:
+                _context.next = 16;
+                return getters.winningHandMessage(gameResult.highestHand);
+
+              case 16:
+                rank = _context.sent;
+                // ToDo: SHould remove the arrayIndex set in the PokerHands Service and use the getter instead...
+                commit('SET_HAND_VALUE', {
                   rank: rank,
                   arrayId: gameResult.highestHand.arrayIndex
                 });
-
-              case 18:
                 commit('SET_WINNING_HAND', {
-                  playerId: gameResult.highestHand.id
+                  playerId: gameResult.highestHand.id,
+                  message: rank.message
                 });
 
               case 19:
-                _context.next = 26;
+                _context.next = 33;
                 break;
 
               case 21:
-                winningHand = getters.sortHandsByRank.shift(), _rank = getters.winningHandMessage(winningHand);
-                console.log("reached set winning hand...", winningHand, _rank);
-                _context.next = 25;
-                return commit('SET_HAND_VALUE', {
-                  rank: _rank,
-                  arrayId: winningHand.arrayIndex
-                });
+                _context.next = 23;
+                return getters.sortHandsByRank.shift();
 
-              case 25:
-                commit('SET_WINNING_HAND', {
-                  playerId: winningHand.id
-                }); ///console.log("Winning player id", getters.sortHandsByRank[0].id);
+              case 23:
+                winningHand = _context.sent;
+                _context.next = 26;
+                return getters.handArrayIndex(winningHand);
 
               case 26:
+                arrayId = _context.sent;
+                _context.next = 29;
+                return getters.winningHandMessage(winningHand);
+
+              case 29:
+                _rank = _context.sent;
+                console.log("reached set winning hand...", winningHand, _rank);
+                commit('SET_HAND_VALUE', {
+                  rank: _rank,
+                  arrayId: arrayId
+                });
+                commit('SET_WINNING_HAND', {
+                  playerId: winningHand.id,
+                  message: _rank.message
+                }); ///console.log("Winning player id", getters.sortHandsByRank[0].id);
+
+              case 33:
               case "end":
                 return _context.stop();
             }
@@ -2910,7 +2921,6 @@ vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.d
       });
     },
     matchingHighHands: function matchingHighHands(state, getters) {
-      //loop through the sortedHands and return the matching ranked cards
       var sortedPlayersHands = getters.sortHandsByRank,
           firstHighestHand = sortedPlayersHands[0].handValue.value;
       return sortedPlayersHands.filter(function (player) {
@@ -2919,9 +2929,19 @@ vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.d
     },
     winningHandMessage: function winningHandMessage() {
       return function (hand) {
-        //How does the kicker get displayed if it is set???
+        var message = "".concat(hand.handValue.highCard.card, " high");
+
+        if (hand.handValue.highCard[0].card) {
+          // for two pairs and books
+          message = "".concat(hand.handValue.highCard[0].card, " high");
+        }
+
+        if (hand.handValue.kicker) {
+          message = "".concat(hand.handValue.kicker.card, " kicker");
+        }
+
         return _objectSpread(_objectSpread({}, hand.handValue), {}, {
-          message: "".concat(hand.name, " wins with a ").concat(hand.handValue.type, ", ").concat(hand.handValue.highCard.card, " high card.")
+          message: "".concat(hand.name, " wins with a ").concat(message, ", ").concat(hand.handValue.type, ".")
         });
       };
     },
@@ -2929,11 +2949,33 @@ vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.d
       return function (splitPotHands) {
         var names = _toConsumableArray(splitPotHands).map(function (hand) {
           return hand.name;
-        }),
-            firstHighCard = _toConsumableArray(splitPotHands).shift();
+        }).join(", "),
+            firstHighCard = _toConsumableArray(splitPotHands).shift(),
+            highCard = firstHighCard.handValue.highCard.value;
 
-        return "Split pot for ".concat(names, ", with a ").concat(firstHighCard.handValue.type, " ").concat(firstHighCard.handValue.highCard.value, " high card.");
-        return message; //will this work with full house and two pair split pots??? 
+        if (splitPotHands.length === 2) {
+          names = names.replaceAll(", ", " & ");
+        }
+
+        names = names.slice(0, names.length);
+
+        if (firstHighCard.handValue.highCard[0].card) {
+          // for two pairs and books
+          if (firstHighCard.handValue.highCard[0].value === _toConsumableArray(splitPotHands)[1].handValue.highCard[0].value) {
+            highCard = "".concat(firstHighCard.handValue.highCard[1].value);
+          } else {
+            highCard = "".concat(firstHighCard.handValue.highCard[0].value);
+          }
+        }
+
+        return "Split pot for players ".concat(names, " with ").concat(firstHighCard.handValue.type, ", ").concat(highCard, " high."); //will this work with full house and two pair split pots??? 
+      };
+    },
+    handArrayIndex: function handArrayIndex(state) {
+      return function (hand) {
+        return state.players.findIndex(function (player) {
+          return player.id === hand.id;
+        });
       };
     }
   }

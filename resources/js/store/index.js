@@ -9,10 +9,11 @@ export default new Vuex.Store({
         deck,
         players: [
             // Remove this after doing compare checks
-            {"id": 987789, "name":"black","hand":["S3","S4","S5","S6","S2"]},
-            {"id": 123321, "name":"white","hand":["C7","C6","C5","C8","C9"]},
-            {"id": 345543, "name":"grey","hand":["H5","H6","H7","H8","H9"]},
-            {"id": 345543, "name":"red","hand":["D5","H6","H7","H8","H4"]},
+            {"id": 987789, "name":"black","hand":["S3","S4","S5","DA","SA"]},
+            {"id": 123321, "name":"white","hand":["C7","D7","C6","S6","C9"]},
+            
+            {"id": 345543, "name":"grey","hand":["H5","H6","H7","S6","D7"]},
+            // {"id": 345543, "name":"red","hand":["D5","H6","H7","H8","H4"]},
         ],
         message: null,
     },
@@ -28,16 +29,18 @@ export default new Vuex.Store({
         },
         SET_HAND_VALUE(state, {arrayId, rank}){
             state.players[arrayId].handValue = rank;
+            console.log("SET HAND VAL:",  state.players[arrayId].handValue)
         },
-        SET_WINNING_HAND(state, {playerId}){
+        SET_WINNING_HAND(state, {playerId, message}){
             let winnerIndex = state.players.findIndex(player => player.id === playerId);
             state.players[winnerIndex].winner = true;
-            state.message = state.players[winnerIndex].handValue.message;
+            console.log("winning hand message: ", state.players[winnerIndex].handValue);
+            state.message = message;
+
+            // state.message = state.players[winnerIndex].handValue.message;
         },
         SET_SPLIT_POT_HANDS(state, {playerIds, message}){
             state.message = message;
-            console.log("SET_SPLIT_POT_HANDS", playerIds, message);
-
             playerIds.forEach(playerId=>{
                 state.players.forEach((player, index) => {
                     if(player.id === playerId){
@@ -69,14 +72,14 @@ export default new Vuex.Store({
         async winningHand(
             {state, commit, getters},
             ){
-            await state.players.forEach((player, arrayId)=>{
+            state.players.forEach((player, arrayId)=>{
                 let rank = new getHandValue(player.hand).rank;
                 commit('SET_HAND_VALUE', {rank, arrayId}); 
             });
             let matchingHighHands = await getters.matchingHighHands;
             if(matchingHighHands.length > 1 ) { //use service to loop through the matching high hands
                 let gameResult = new compareHighHands(matchingHighHands);
-                console.log({gameResult});
+                console.log("Matcing high hands check", {gameResult});
 
                 if(gameResult.splitPotHands.length){ //ToDo: update the split pot hands with a splitPot flag
                     console.log('Reached split pot hands');
@@ -84,16 +87,19 @@ export default new Vuex.Store({
                     playerIds = gameResult.splitPotHands.map(hand => hand.id);
                     commit('SET_SPLIT_POT_HANDS', {message, playerIds})
                 } else {
-                    let rank = getters.winningHandMessage(gameResult.highestHand);
-                    await commit('SET_HAND_VALUE', {rank, arrayId: gameResult.highestHand.arrayIndex}); 
-                    commit('SET_WINNING_HAND', { playerId : gameResult.highestHand.id })
+                    let rank = await getters.winningHandMessage(gameResult.highestHand);
+                    // ToDo: SHould remove the arrayIndex set in the PokerHands Service and use the getter instead...
+                    commit('SET_HAND_VALUE', {rank, arrayId: gameResult.highestHand.arrayIndex}); 
+                    commit('SET_WINNING_HAND', { playerId : gameResult.highestHand.id, message: rank.message });
                 }
             } else {
-                let winningHand = getters.sortHandsByRank.shift(),
-                rank = getters.winningHandMessage(winningHand);
+                let winningHand = await getters.sortHandsByRank.shift(),
+                arrayId = await getters.handArrayIndex(winningHand), 
+                rank = await getters.winningHandMessage(winningHand);
+
                 console.log("reached set winning hand...", winningHand, rank);
-                await commit('SET_HAND_VALUE', {rank, arrayId: winningHand.arrayIndex}); 
-                commit('SET_WINNING_HAND', { playerId : winningHand.id })
+                commit('SET_HAND_VALUE', {rank, arrayId}); 
+                commit('SET_WINNING_HAND', { playerId : winningHand.id, message: rank.message })
                 ///console.log("Winning player id", getters.sortHandsByRank[0].id);
             }
         },
@@ -112,23 +118,42 @@ export default new Vuex.Store({
             return [...state.players].sort(( firstPlayer, secondPlayer ) => firstPlayer.handValue.value - secondPlayer.handValue.value );
         },
         matchingHighHands: (state, getters) => {
-            //loop through the sortedHands and return the matching ranked cards
             let sortedPlayersHands = getters.sortHandsByRank,
             firstHighestHand = sortedPlayersHands[0].handValue.value;
             return sortedPlayersHands.filter(player => player.handValue.value === firstHighestHand);
         },
         winningHandMessage: () => (hand) => {
-            //How does the kicker get displayed if it is set???
-            return { ...hand.handValue, 
-                message: `${hand.name} wins with a ${hand.handValue.type}, ${hand.handValue.highCard.card} high card.`,
+            let message = `${hand.handValue.highCard.card} high`;
+            if(hand.handValue.highCard[0].card){ // for two pairs and books
+                message = `${hand.handValue.highCard[0].card} high`;
             }
+            if(hand.handValue.kicker){
+                message = `${hand.handValue.kicker.card} kicker`;
+            }
+            return { ...hand.handValue, 
+                message: `${hand.name} wins with a ${message}, ${hand.handValue.type}.`,
+            };
         },
         splitPotMessage: () => (splitPotHands) => {
-            let names = [...splitPotHands].map(hand => hand.name),
-            firstHighCard = [...splitPotHands].shift();
-            return `Split pot for ${names}, with a ${firstHighCard.handValue.type} ${firstHighCard.handValue.highCard.value} high card.`
-            return message;
+            let names = [...splitPotHands].map(hand => hand.name).join(", "),
+            firstHighCard = [...splitPotHands].shift(),
+            highCard = firstHighCard.handValue.highCard.value;
+            if(splitPotHands.length === 2){
+                names = names.replaceAll(", ", " & ");
+            }
+            names = names.slice(0, names.length);
+            if(firstHighCard.handValue.highCard[0].card){ // for two pairs and books
+                if(firstHighCard.handValue.highCard[0].value === [...splitPotHands][1].handValue.highCard[0].value){
+                    highCard = `${firstHighCard.handValue.highCard[1].value}`;
+                } else {
+                    highCard = `${firstHighCard.handValue.highCard[0].value}`;
+                }
+            }
+            return `Split pot for players ${names} with ${firstHighCard.handValue.type}, ${highCard} high.`
             //will this work with full house and two pair split pots??? 
+        },
+        handArrayIndex: (state) => (hand) => {
+            return state.players.findIndex(player =>  player.id === hand.id);
         }
     },
 })

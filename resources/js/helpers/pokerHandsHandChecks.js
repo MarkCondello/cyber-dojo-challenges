@@ -7,7 +7,7 @@ export default class HandChecks {
     singlePair(){
         let pairs = helpers.pairsCheck([...this.playersCards]);
         if(pairs.length === 1) {
-            return this.rank = {value: 8, type: "One pair", highCard: helpers.getCardsValues(pairs).pop(), };
+            return this.rank = {value: 8, type: "Pair", highCard: helpers.getCardsValues(pairs).pop(), };
         }
         return false;
     }

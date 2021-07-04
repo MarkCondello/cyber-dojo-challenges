@@ -24,17 +24,19 @@ export default class compareHighHandsHelpers {
             //filter hands by top high card and sort by value
             let playersSecondPairValuesFilteredAndSorted = [...playersHighPairValuesSorted]
                 .filter(highHand => highHand.handValue.highCard[0].value === playersHighPairValuesSorted[0].handValue.highCard[0].value)
-                .sort((playerA, playerB) => playerB.handValue.highCard[1].value - playerA.handValue.highCard[1].value);
+                .sort((playerA, playerB) =>  playerB.handValue.highCard[1].value - playerA.handValue.highCard[1].value);
 
             if (playersSecondPairValuesFilteredAndSorted[0].handValue.highCard[1].value === playersSecondPairValuesFilteredAndSorted[1].handValue.highCard[1].value) { //if second players have same second hand split pot
                 let matchingSecondCardHands = [...playersSecondPairValuesFilteredAndSorted]
                     .filter(highHand => highHand.handValue.highCard[1].value === playersSecondPairValuesFilteredAndSorted[0].handValue.highCard[1].value);
                 this.splitPotHands = matchingSecondCardHands;
             } else {
-                this.kicker = playersSecondPairValuesFilteredAndSorted[0]; //return the hand with the high second card as kicker value
+               this.highestHand = playersSecondPairValuesFilteredAndSorted[0];
+               this.highestHand.handValue.kicker = playersSecondPairValuesFilteredAndSorted[0].handValue.highCard[1]; //return the hand with the high second card as kicker value
+                this.highestHand.arrayIndex = this.getWinningHandIndex();
             }
         } else {
-            this.highestHand = playersHighPairValuesSorted[0];
+            this.highestHand = playersHighPairValuesSorted.shift();
             this.highestHand.arrayIndex = this.getWinningHandIndex();
         }
     }
