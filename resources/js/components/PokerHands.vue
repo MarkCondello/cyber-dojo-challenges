@@ -1,23 +1,35 @@
 <template>
-    <div>
+    <div class="poker-hands">
         <template v-if="this.players">
             <h1>POKER HANDS</h1><!-- should use a computed method to check each player has their hand -->
             <template v-if="players[0].hand.length">
-                <button style="width: 100%;" @click.stop="handleGetWinner">Who wins?</button>
+                <template v-if="message">
+                    <h3 v-text="message"></h3>
+                    <!-- Add button to play again -->
+                </template>
+                <button v-else style="width: 100%;" @click.stop="handleGetWinner" class="btn btn-primary">Who wins?</button>
+        <!-- Show winners hand with meta -->
                 <div class="container">
                     <article v-for="(player, pid) in this.players" :key="pid">
                         <h2>{{player.name}}</h2>
-                        <ul>
-                           <li v-for="(card, cid) in player.hand" :key="pid + cid">
-                               {{card}}
+                        <ul class="hand">
+                           <li v-for="(card, cid) in player.hand" :key="pid + cid" class="card">
+                               <div>
+                                    <span>{{card[1]}}</span>
+                                    <span v-html="cardSuit(card[0])"></span>
+                               </div>
+                                <div>
+                                    <span>{{card[1]}}</span>
+                                    <span v-html="cardSuit(card[0])"></span>
+                               </div>
                            </li>
                         </ul>
                     </article>
                 </div>
             </template>
-            <button v-else style="width: 100%;" @click.stop="dealCards">Deal</button>
+            <button v-else style="width: 100%;" @click.stop="dealCards" class="btn btn-primary">Deal</button>
         </template>
-        <!-- Show winners hand with meta -->
+
     </div>
 </template>
 
@@ -36,23 +48,26 @@ export default {
         // this.addPlayers({players: this.playerItems});
     },
     computed: {
-        ...mapState(['players']),
+        ...mapState(['players', 'message']),
     },
     methods: {
         ...mapActions(['dealCards', 'addPlayers', 'winningHand']),
          handleGetWinner(){
             this.winningHand()
+        },
+        cardSuit(suit){
+            switch(suit){
+                case('H'):
+                    return '&hearts;';
+                case('S'):
+                    return '&spades;';
+                case('D'):
+                    return '&diams;';
+                case('C'):
+                    return '&clubs;';
+            }
         }
     },
 }
-</script>
-
-<style>
-.container {
-    padding: 25px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 50px;
-}
-</style>   
+</script>  
  

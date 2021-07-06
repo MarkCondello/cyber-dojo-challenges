@@ -1,0 +1,24 @@
+#score-card {
+    .frame {
+        position: relative;
+
+        .attempts {
+            position: absolute;
+            top: -.75rem;
+            right: -.75rem;
+            display: flex;
+            border-bottom: 1px solid grey;
+            border-left: 1px solid grey;
+            flex-direction: row;
+            justify-content: space-between;
+
+            span {
+                padding: 5px;
+                font-size: 10px;
+            }
+            span:first-child {
+                border-right: 1px solid grey;
+            }
+        }
+    }
+}

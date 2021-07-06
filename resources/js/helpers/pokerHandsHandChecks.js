@@ -77,9 +77,9 @@ export default class HandChecks {
     }
     bookCheck(){
         let hasTrips = this.tripsCheck();
-        if(hasTrips){
-            let tripsValue = hasTrips.card[1]; //remove items in the hand which match the trips value
-            let filteredTripsOut = [...this.playersCards].filter(card => card[1] !== tripsValue);
+        if(hasTrips){ 
+            let tripsValue = hasTrips.highCard.value; //remove items in the hand which match the trips value
+            let filteredTripsOut = [...this.playersCards].filter(card => parseInt(card[1]) !== tripsValue);
             if(filteredTripsOut[0][1] === filteredTripsOut[1][1]){  // check the remaining cards are matching
                 return this.rank = { value: 3, type: "Full House", highCard: { trips: hasTrips, pair: helpers.getCardsValues([filteredTripsOut[0]])[0],}, }; 
             }
