@@ -13,7 +13,8 @@ export default class HandChecks {
     }
     twoPair(){
         let pairs = helpers.pairsCheck([...this.playersCards]);
-        if(pairs.length === 2){
+        if(pairs.length >= 2){
+            console.log({pairs})
             return this.rank = {value: 7, type: "Two pairs", highCard: helpers.sortCardsByValues(pairs, 'desc')};
         }
         return false;
@@ -79,7 +80,7 @@ export default class HandChecks {
         let hasTrips = this.tripsCheck();
         if(hasTrips){ 
             let tripsValue = hasTrips.highCard.value; //remove items in the hand which match the trips value
-            let filteredTripsOut = [...this.playersCards].filter(card => parseInt(card[1]) !== tripsValue);
+            let filteredTripsOut = [...this.playersCards].filter(card => parseInt(card.slice(1)) !== tripsValue);
             if(filteredTripsOut[0][1] === filteredTripsOut[1][1]){  // check the remaining cards are matching
                 return this.rank = { value: 3, type: "Full House", highCard: { trips: hasTrips, pair: helpers.getCardsValues([filteredTripsOut[0]])[0],}, }; 
             }
@@ -109,7 +110,7 @@ export default class HandChecks {
     royalFlushCheck(){
         let firstCardsValue = helpers.sortCardsByValues([...this.playersCards])[0].value;
         if (firstCardsValue === 10 && this.straightCheck(this.playersCards) && this.flushCheck(this.playersCards)){
-            return this.rank = {value: 0, type: "Royal Flush", highCard: this.playersHighHands};
+            return this.rank = {value: 0, type: "Royal Flush", highCard: { card: "Royal Flush" } };
         }
     }
 }

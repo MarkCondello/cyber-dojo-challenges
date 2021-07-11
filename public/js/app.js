@@ -1929,6 +1929,17 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         case 'C':
           return '&clubs;';
       }
+    },
+    cardColor: function cardColor(suit) {
+      switch (suit) {
+        case 'H':
+        case 'D':
+          return '#F00';
+
+        case 'S':
+        case 'C':
+          return '#000;';
+      }
     }
   })
 });
@@ -2037,19 +2048,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 var helpers = {
   pairsCheck: function pairsCheck(cards) {
-    var pairs = [];
-    cards.forEach(function (card, needleId) {
-      var cardValue = card[1];
-      cards.forEach(function (key, hayStackId) {
-        //console.log({key, card, key1: key[1], cardValue})
-        if (key !== card && key[1] === cardValue) {
-          pairs.push(card);
-          cards.splice(needleId, 1); //remove the card from the list
+    var pairs = []; // console.log({cards})
 
-          var matchIndex = cards.findIndex(function (item) {
-            return item === key;
-          });
-          cards.splice(matchIndex, 1); //remove the card from the list
+    cards.forEach(function (card, index) {
+      var cardValue = card.slice(1);
+      cards.splice(index, 1); //remove the card being searched
+
+      cards.forEach(function (key) {
+        if (key !== card && key.slice(1) === cardValue) {
+          pairs.push(key);
+          cards = cards.filter(function (item) {
+            return item[1] !== cardValue;
+          }); //remove any card with cardValue
         }
       });
     });
@@ -2148,6 +2158,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ compareHighHandsHelpers)
 /* harmony export */ });
+/* harmony import */ var _pokerHandHelpers_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./pokerHandHelpers.js */ "./resources/js/helpers/pokerHandHelpers.js");
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -2165,6 +2176,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
 
 var compareHighHandsHelpers = /*#__PURE__*/function () {
   function compareHighHandsHelpers() {
@@ -2204,6 +2217,8 @@ var compareHighHandsHelpers = /*#__PURE__*/function () {
   }, {
     key: "compareTwoPairHighCards",
     value: function compareTwoPairHighCards() {
+      console.log("reached compareTwoPairHighCards");
+
       var playersHighPairValuesSorted = _toConsumableArray(this.playersHighHands).sort(function (playerA, playerB) {
         return playerB.handValue.highCard[0].value - playerA.handValue.highCard[0].value;
       }); //if there are no mathching high cards from players return the high hand
@@ -2221,9 +2236,37 @@ var compareHighHandsHelpers = /*#__PURE__*/function () {
           //if second players have same second hand split pot
           var matchingSecondCardHands = _toConsumableArray(playersSecondPairValuesFilteredAndSorted).filter(function (highHand) {
             return highHand.handValue.highCard[1].value === playersSecondPairValuesFilteredAndSorted[0].handValue.highCard[1].value;
+          }); //check for non pair hands, if the non pair items are not the same splitPotHands = null
+          //remove pairs and check the remainder
+
+
+          var nonPairsHandSortedByValue = _toConsumableArray(matchingSecondCardHands).map(function (secondCardHand) {
+            var pairs = [];
+            pairs.push(secondCardHand.handValue.highCard[0].card.slice(1));
+            pairs.push(secondCardHand.handValue.highCard[1].card.slice(1));
+
+            var nonPairs = _toConsumableArray(secondCardHand.hand).filter(function (card) {
+              // get non pair cards
+              return !pairs.includes(card.slice(1));
+            });
+
+            secondCardHand.handValue.nonPairs = _pokerHandHelpers_js__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(nonPairs);
+            return secondCardHand;
+          }).sort(function (playerA, playerB) {
+            return playerB.handValue.nonPairs[0].value - playerA.handValue.nonPairs[0].value;
           });
 
-          this.splitPotHands = matchingSecondCardHands;
+          if (nonPairsHandSortedByValue[0].handValue.nonPairs[0].value > nonPairsHandSortedByValue[1].handValue.nonPairs[0].value) {
+            this.highestHand = nonPairsHandSortedByValue[0];
+            this.highestHand.handValue.kicker = nonPairsHandSortedByValue[0].handValue.nonPairs[0];
+            this.highestHand.arrayIndex = this.getWinningHandIndex();
+          } else {
+            this.splitPotHands = _toConsumableArray(matchingSecondCardHands);
+          }
+
+          console.log({
+            nonPairsHandSortedByValue: nonPairsHandSortedByValue
+          });
         } else {
           this.highestHand = playersSecondPairValuesFilteredAndSorted[0];
           this.highestHand.handValue.kicker = playersSecondPairValuesFilteredAndSorted[0].handValue.highCard[1]; //return the hand with the high second card as kicker value
@@ -2329,7 +2372,10 @@ var HandChecks = /*#__PURE__*/function () {
     value: function twoPair() {
       var pairs = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.pairsCheck(_toConsumableArray(this.playersCards));
 
-      if (pairs.length === 2) {
+      if (pairs.length >= 2) {
+        console.log({
+          pairs: pairs
+        });
         return this.rank = {
           value: 7,
           type: "Two pairs",
@@ -2451,7 +2497,7 @@ var HandChecks = /*#__PURE__*/function () {
         var tripsValue = hasTrips.highCard.value; //remove items in the hand which match the trips value
 
         var filteredTripsOut = _toConsumableArray(this.playersCards).filter(function (card) {
-          return parseInt(card[1]) !== tripsValue;
+          return parseInt(card.slice(1)) !== tripsValue;
         });
 
         if (filteredTripsOut[0][1] === filteredTripsOut[1][1]) {
@@ -2517,7 +2563,9 @@ var HandChecks = /*#__PURE__*/function () {
         return this.rank = {
           value: 0,
           type: "Royal Flush",
-          highCard: this.playersHighHands
+          highCard: {
+            card: "Royal Flush"
+          }
         };
       }
     }
@@ -2527,6 +2575,42 @@ var HandChecks = /*#__PURE__*/function () {
 }();
 
 
+
+/***/ }),
+
+/***/ "./resources/js/helpers/textFormatting.js":
+/*!************************************************!*\
+  !*** ./resources/js/helpers/textFormatting.js ***!
+  \************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+function _toArray(arr) { return _arrayWithHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+var textFormatting = {
+  ucFirst: function ucFirst(string) {
+    var _string = _toArray(string),
+        first = _string[0],
+        rest = _string.slice(1);
+
+    return "".concat(first.toUpperCase()).concat(rest.join(""));
+  }
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (textFormatting);
 
 /***/ }),
 
@@ -2626,17 +2710,15 @@ var compareHighHands = /*#__PURE__*/function (_compareHighHandsHelp) {
     value: function checkValue() {
       switch (this.handType) {
         case "Royal Flush":
-          console.log("Royal Flush");
           this.splitPotHands = this.playersHighHands;
           break;
 
         case "Two pairs":
-          console.log("Reached two pair check");
+          //need to check for non pair cards high card
           this.compareTwoPairHighCards(this.playersHighHands);
           break;
 
         case "Full House":
-          console.log("Reached Full House check");
           this.compareFullHouseCards(this.playersHighHands);
           break;
 
@@ -2644,7 +2726,8 @@ var compareHighHands = /*#__PURE__*/function (_compareHighHandsHelp) {
         case "Flush":
         case "Straight":
         case "Three of a kind":
-        case "Pair":
+        case "Pair": //need to check for non pair cards high card
+
         case "High card":
         default:
           console.log("Reached compare high hands check");
@@ -2707,9 +2790,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
-/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
 /* harmony import */ var _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../service/PokerHands */ "./resources/js/service/PokerHands.js");
+/* harmony import */ var _helpers_textFormatting__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helpers/textFormatting */ "./resources/js/helpers/textFormatting.js");
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -2737,23 +2821,25 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 
 
-vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.default);
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new vuex__WEBPACK_IMPORTED_MODULE_3__.default.Store({
+
+vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.default);
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new vuex__WEBPACK_IMPORTED_MODULE_4__.default.Store({
   state: {
     deck: _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.deck,
-    players: [// Remove this after doing compare checks
+    players: [// CHeck against next highest and next lowest hand, split pot, highest hand
+    // Remove this after doing compare checks
     {
       "id": 987789,
       "name": "black",
-      "hand": ["S3", "D3", "H6", "DK", "SK"]
+      "hand": ["SA", "DA", "C2", "HK", "CK"]
     }, {
       "id": 123321,
       "name": "white",
-      "hand": ["C3", "H3", "S9", "HK", "CK"]
+      "hand": ["S7", "D3", "C5", "S8", "D5"]
     }, {
       "id": 345543,
       "name": "grey",
-      "hand": ["H5", "H6", "H7", "S6", "D7"]
+      "hand": ["SK", "HK", "S2", "DA", "SA"]
     } // {"id": 345543, "name":"red","hand":["D5","H6","H7","H8","H4"]},
     ],
     message: null
@@ -2948,29 +3034,50 @@ vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.d
     },
     winningHandMessage: function winningHandMessage() {
       return function (hand) {
-        var message = "".concat(hand.handValue.highCard.card, " high");
+        console.log({
+          hand: hand
+        });
+        var message = '';
 
-        if (hand.handValue.highCard[0].card) {
-          // for two pairs and books
-          message = "".concat(hand.handValue.highCard[0].card[1], " high");
+        switch (hand.handValue.type) {
+          case "Royal Flush":
+          case "Four of a kind":
+            message = '';
+            break;
+
+          case "Two pairs":
+            message = "a ".concat(hand.handValue.highCard[0].card[1], " high,");
+            break;
+
+          case "Full House":
+            message = "a ".concat(hand.handValue.highCard.trips.highCard.value, " high,");
+            break;
+
+          default:
+            message = "".concat(hand.handValue.highCard.card[1], " high,");
         }
 
         if (hand.handValue.kicker) {
-          message = "".concat(hand.handValue.kicker.card[1], " kicker");
+          message = "a ".concat(hand.handValue.kicker.card.slice(1), " high kicker,");
         }
 
         return _objectSpread(_objectSpread({}, hand.handValue), {}, {
-          message: "".concat(hand.name, " wins with a ").concat(message, ", ").concat(hand.handValue.type, ".")
+          message: "".concat(_helpers_textFormatting__WEBPACK_IMPORTED_MODULE_2__.default.ucFirst(hand.name), " wins with ").concat(message, " ").concat(hand.handValue.type, ".")
         });
       };
     },
     splitPotMessage: function splitPotMessage() {
       return function (splitPotHands) {
         var names = _toConsumableArray(splitPotHands).map(function (hand) {
-          return hand.name;
+          return _helpers_textFormatting__WEBPACK_IMPORTED_MODULE_2__.default.ucFirst(hand.name);
         }).join(", "),
             firstHighCard = _toConsumableArray(splitPotHands).shift(),
-            highCard = firstHighCard.handValue.highCard.value;
+            highCard = firstHighCard.handValue.highCard,
+            highCardMessage = highCard.value;
+
+        if (highCardMessage > 9) {
+          highCardMessage = highCard.card[1];
+        }
 
         if (_toConsumableArray(splitPotHands).length === 2) {
           names = names.replaceAll(", ", " & ");
@@ -2979,18 +3086,14 @@ vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.d
         names = names.slice(0, names.length);
 
         if (firstHighCard.handValue.type === "Two pairs") {
-          // WIll this work with 3 or more players with similar hands
-          // if(firstHighCard.handValue.highCard[0].value === [...splitPotHands][1].handValue.highCard[0].value){
-          //highCard = `${firstHighCard.handValue.highCard[1].value}`;
-          // } else {
-          highCard = "".concat(firstHighCard.handValue.highCard[0].card[1]); // }
+          highCardMessage = "".concat(firstHighCard.handValue.highCard[0].card[1]);
         }
 
         if (firstHighCard.handValue.type === "Full House") {
-          highCard = "".concat(firstHighCard.handValue.highCard.trips.highCard.card[1]);
+          highCardMessage = "".concat(firstHighCard.handValue.highCard.trips.highCard.card[1]);
         }
 
-        return "Split pot for players ".concat(names, " with ").concat(firstHighCard.handValue.type.toLowerCase(), ", ").concat(highCard, " high.");
+        return "Split pot for players ".concat(names, " with ").concat(firstHighCard.handValue.type.toLowerCase(), ", ").concat(highCardMessage, " high.");
       };
     },
     handArrayIndex: function handArrayIndex(state) {
@@ -39278,10 +39381,14 @@ var render = function() {
                           _vm._l(player.hand, function(card, cid) {
                             return _c(
                               "li",
-                              { key: pid + cid, staticClass: "card" },
+                              {
+                                key: pid + cid,
+                                staticClass: "card",
+                                style: "color:" + _vm.cardColor(card[0])
+                              },
                               [
                                 _c("div", [
-                                  _c("span", [_vm._v(_vm._s(card[1]))]),
+                                  _c("span", [_vm._v(_vm._s(card.slice(1)))]),
                                   _vm._v(" "),
                                   _c("span", {
                                     domProps: {
@@ -39291,7 +39398,7 @@ var render = function() {
                                 ]),
                                 _vm._v(" "),
                                 _c("div", [
-                                  _c("span", [_vm._v(_vm._s(card[1]))]),
+                                  _c("span", [_vm._v(_vm._s(card.slice(1)))]),
                                   _vm._v(" "),
                                   _c("span", {
                                     domProps: {

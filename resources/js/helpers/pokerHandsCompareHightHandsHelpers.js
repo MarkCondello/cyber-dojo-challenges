@@ -1,3 +1,4 @@
+import {helpers} from './pokerHandHelpers.js';
 
 export default class compareHighHandsHelpers {
     compareFullHouseCards(){
@@ -18,18 +19,40 @@ export default class compareHighHandsHelpers {
         }
     }
     compareTwoPairHighCards() {
+        console.log("reached compareTwoPairHighCards")
         let playersHighPairValuesSorted = [...this.playersHighHands].sort((playerA, playerB) => playerB.handValue.highCard[0].value - playerA.handValue.highCard[0].value);
         //if there are no mathching high cards from players return the high hand
         if (playersHighPairValuesSorted[0].handValue.highCard[0].value === playersHighPairValuesSorted[1].handValue.highCard[0].value) {
             //filter hands by top high card and sort by value
             let playersSecondPairValuesFilteredAndSorted = [...playersHighPairValuesSorted]
                 .filter(highHand => highHand.handValue.highCard[0].value === playersHighPairValuesSorted[0].handValue.highCard[0].value)
-                .sort((playerA, playerB) =>  playerB.handValue.highCard[1].value - playerA.handValue.highCard[1].value);
-
+                .sort((playerA, playerB) => playerB.handValue.highCard[1].value - playerA.handValue.highCard[1].value);
             if (playersSecondPairValuesFilteredAndSorted[0].handValue.highCard[1].value === playersSecondPairValuesFilteredAndSorted[1].handValue.highCard[1].value) { //if second players have same second hand split pot
                 let matchingSecondCardHands = [...playersSecondPairValuesFilteredAndSorted]
                     .filter(highHand => highHand.handValue.highCard[1].value === playersSecondPairValuesFilteredAndSorted[0].handValue.highCard[1].value);
-                this.splitPotHands = matchingSecondCardHands;
+                //check for non pair hands, if the non pair items are not the same splitPotHands = null
+                    //remove pairs and check the remainder
+                     let nonPairsHandSortedByValue = [...matchingSecondCardHands].map(secondCardHand=>{
+                        let pairs = [];
+                        pairs.push(secondCardHand.handValue.highCard[0].card.slice(1));
+                        pairs.push(secondCardHand.handValue.highCard[1].card.slice(1));
+
+                        let nonPairs = [...secondCardHand.hand].filter((card) => { // get non pair cards
+                            return !pairs.includes(card.slice(1));
+                        });
+                        secondCardHand.handValue.nonPairs = helpers.sortCardsByValues(nonPairs);
+                        return secondCardHand;
+                    }).sort((playerA, playerB) => playerB.handValue.nonPairs[0].value - playerA.handValue.nonPairs[0].value)
+
+                    if(nonPairsHandSortedByValue[0].handValue.nonPairs[0].value > nonPairsHandSortedByValue[1].handValue.nonPairs[0].value){
+                        this.highestHand = nonPairsHandSortedByValue[0];
+                        this.highestHand.handValue.kicker = nonPairsHandSortedByValue[0].handValue.nonPairs[0];
+                        this.highestHand.arrayIndex = this.getWinningHandIndex();
+
+                    } else {
+                        this.splitPotHands = [...matchingSecondCardHands];
+                    }
+                    console.log({nonPairsHandSortedByValue});
             } else {
                this.highestHand = playersSecondPairValuesFilteredAndSorted[0];
                this.highestHand.handValue.kicker = playersSecondPairValuesFilteredAndSorted[0].handValue.highCard[1]; //return the hand with the high second card as kicker value

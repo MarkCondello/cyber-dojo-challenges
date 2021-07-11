@@ -2,23 +2,19 @@ export let helpers = {
  
     pairsCheck(cards){
         let pairs = [];
-        cards.forEach((card, needleId) =>  {
-            let cardValue = card[1];
-    
-            cards.forEach((key, hayStackId) => {
-                //console.log({key, card, key1: key[1], cardValue})
-                if(key !== card && key[1] === cardValue){
-                    pairs.push(card);
-                    cards.splice(needleId, 1); //remove the card from the list
-                    let matchIndex = cards.findIndex(item => item === key);
-                    cards.splice(matchIndex, 1); //remove the card from the list
-    
+        // console.log({cards})
+        cards.forEach((card, index) =>  {
+            let cardValue = card.slice(1);
+                cards.splice(index, 1);//remove the card being searched
+                cards.forEach((key) => {
+                if(key !== card && key.slice(1) === cardValue){
+                    pairs.push(key);
+                    cards = cards.filter(item => item[1] !== cardValue); //remove any card with cardValue
                 }
              });
         });
         return pairs;
     },
-
     getCardsValues(cardsArr) {
        // console.log("getCardsValues, cardsArr:", cardsArr)
         let cardItemsWithValues = [];

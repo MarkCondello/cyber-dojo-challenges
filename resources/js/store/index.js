@@ -1,6 +1,7 @@
 import Vue from "vue";
 import Vuex from 'vuex';
 import {deck, getHandValue, compareHighHands} from "../service/PokerHands";
+import textFormatting from "../helpers/textFormatting";
 
 Vue.use(Vuex);
 
@@ -8,11 +9,11 @@ export default new Vuex.Store({
     state: {
         deck,
         players: [
+            // CHeck against next highest and next lowest hand, split pot, highest hand
             // Remove this after doing compare checks
-            {"id": 987789, "name":"black","hand":["S3","D3","H6","DK","SK"]},
-            {"id": 123321, "name":"white","hand":["C3","H3","S9","HK","CK"]},
-            
-            {"id": 345543, "name":"grey","hand":["H5","H6","H7","S6","D7"]},
+            {"id": 987789, "name":"black","hand":["SA","DA","C2","HK","CK"]},
+            {"id": 123321, "name":"white","hand":["S7","D3","C5","S8","D5"]},
+            {"id": 345543, "name":"grey","hand":["SK","HK","S2","DA","SA"]},
             // {"id": 345543, "name":"red","hand":["D5","H6","H7","H8","H4"]},
         ],
         message: null,
@@ -115,37 +116,51 @@ export default new Vuex.Store({
             return sortedPlayersHands.filter(player => player.handValue.value === firstHighestHand);
         },
         winningHandMessage: () => (hand) => {
-            let message = `${hand.handValue.highCard.card} high`;
-            if(hand.handValue.highCard[0].card){ // for two pairs and books
-                message = `${hand.handValue.highCard[0].card[1]} high`;
+            console.log({hand})
+            let message = '';
+
+            switch(hand.handValue.type){
+                case "Royal Flush":
+                case "Four of a kind":
+                    message = '';
+                break;
+                case "Two pairs":
+                    message = `a ${hand.handValue.highCard[0].card[1]} high,`;
+                break;
+                case "Full House":
+                    message = `a ${hand.handValue.highCard.trips.highCard.value} high,`;
+                break;
+                default:
+                    message = `${hand.handValue.highCard.card[1]} high,`;
             }
             if(hand.handValue.kicker){
-                message = `${hand.handValue.kicker.card[1]} kicker`;
+                message = `a ${hand.handValue.kicker.card.slice(1)} high kicker,`;
             }
             return { ...hand.handValue, 
-                message: `${hand.name} wins with a ${message}, ${hand.handValue.type}.`,
+                message: `${textFormatting.ucFirst(hand.name)} wins with ${message} ${hand.handValue.type}.`,
             };
         },
         splitPotMessage: () => (splitPotHands) => {
-            let names = [...splitPotHands].map(hand => hand.name).join(", "),
+            let names = [...splitPotHands].map(hand => textFormatting.ucFirst(hand.name)).join(", "),
             firstHighCard = [...splitPotHands].shift(),
-            highCard = firstHighCard.handValue.highCard.value;
+            highCard = firstHighCard.handValue.highCard,
+            highCardMessage = highCard.value;
+
+            if(highCardMessage > 9){
+                highCardMessage = highCard.card[1]; 
+            }
+
             if([...splitPotHands].length === 2){
                 names = names.replaceAll(", ", " & ");
             }
             names = names.slice(0, names.length);
             if(firstHighCard.handValue.type === "Two pairs"){  
-                // WIll this work with 3 or more players with similar hands
-                // if(firstHighCard.handValue.highCard[0].value === [...splitPotHands][1].handValue.highCard[0].value){
-                    //highCard = `${firstHighCard.handValue.highCard[1].value}`;
-                // } else {
-                    highCard = `${firstHighCard.handValue.highCard[0].card[1]}`;
-                // }
+                highCardMessage = `${firstHighCard.handValue.highCard[0].card[1]}`;
             }
             if(firstHighCard.handValue.type === "Full House"){  
-                highCard = `${firstHighCard.handValue.highCard.trips.highCard.card[1]}`;
+                highCardMessage = `${firstHighCard.handValue.highCard.trips.highCard.card[1]}`;
             }
-            return `Split pot for players ${names} with ${firstHighCard.handValue.type.toLowerCase()}, ${highCard} high.`
+            return `Split pot for players ${names} with ${firstHighCard.handValue.type.toLowerCase()}, ${highCardMessage} high.`
         },
         handArrayIndex: (state) => (hand) => {
             return state.players.findIndex(player =>  player.id === hand.id);
