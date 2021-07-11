@@ -13,7 +13,7 @@ export default new Vuex.Store({
             // Remove this after doing compare checks
             {"id": 987789, "name":"black","hand":["CA","DA","C9","H6","CK"]},
             {"id": 123321, "name":"white","hand":["S7","D3","C5","S8","D5"]},
-            {"id": 345543, "name":"grey","hand":["SK","D9","S3","DA","SA"]},
+            {"id": 345543, "name":"grey","hand":["SK","D9","S3","D4","SA"]},
             // {"id": 345543, "name":"red","hand":["D5","H6","H7","H8","H4"]},
         ],
         message: null,

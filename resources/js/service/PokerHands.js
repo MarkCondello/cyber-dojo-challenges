@@ -35,6 +35,9 @@ export class compareHighHands extends compareHighHandsHelpers{
          case "Pair":
             this.comparePairHighCards(this.playersHighHands);
             break;  //need to check for non pair cards high card
+         case "High card":
+            this.compareCards(this.playersHighHands);
+            break;
          case "Straight Flush":
          case "Flush":
          case "Straight":

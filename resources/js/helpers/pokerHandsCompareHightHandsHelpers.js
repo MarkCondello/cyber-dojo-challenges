@@ -75,7 +75,9 @@ export default class compareHighHandsHelpers {
             let setWinningKickerHand = (nonPairCardId = 0, sortedCards, nthLabel = "First") => {
                 console.log(`${nthLabel} non pair check`, {first: sortedCards[0].handValue.nonPairs[nonPairCardId].value, second: sortedCards[1].handValue.nonPairs[nonPairCardId].value , card: sortedCards[0].handValue.nonPairs[nonPairCardId].card})
                 this.highestHand = sortedCards[0];
-                this.highestHand.kicker = sortedCards[0].handValue.nonPairs[nonPairCardId].card;
+                this.highestHand.handValue.kicker = {
+                    card : sortedCards[0].handValue.nonPairs[nonPairCardId].card,
+                };
                 this.highestHand.arrayIndex = this.getWinningHandIndex();
             }
             //check highest nonPair hands from the 2 hands, there can not be more than 2 pairs of any card
@@ -99,6 +101,12 @@ export default class compareHighHandsHelpers {
             this.highestHand.arrayIndex = this.getWinningHandIndex();
         }
     }
+    compareCards(){
+        
+    }
+
+
+
     compareHighCards() {
         let playersHighCardValuesSorted = [...this.playersHighHands].sort((playerA, playerB) => playerB.handValue.highCard.value - playerA.handValue.highCard.value);
         if (playersHighCardValuesSorted[0].handValue.highCard.value === playersHighCardValuesSorted[1].handValue.highCard.value) {

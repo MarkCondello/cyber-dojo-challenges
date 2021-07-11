@@ -2332,7 +2332,9 @@ var compareHighHandsHelpers = /*#__PURE__*/function () {
             card: sortedCards[0].handValue.nonPairs[nonPairCardId].card
           });
           _this.highestHand = sortedCards[0];
-          _this.highestHand.kicker = sortedCards[0].handValue.nonPairs[nonPairCardId].card;
+          _this.highestHand.handValue.kicker = {
+            card: sortedCards[0].handValue.nonPairs[nonPairCardId].card
+          };
           _this.highestHand.arrayIndex = _this.getWinningHandIndex();
         }; //check highest nonPair hands from the 2 hands, there can not be more than 2 pairs of any card
 
@@ -2925,7 +2927,7 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
     }, {
       "id": 345543,
       "name": "grey",
-      "hand": ["SK", "D9", "S3", "DA", "SA"]
+      "hand": ["SK", "D9", "S3", "D4", "SA"]
     } // {"id": 345543, "name":"red","hand":["D5","H6","H7","H8","H4"]},
     ],
     message: null
