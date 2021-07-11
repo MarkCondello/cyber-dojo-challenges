@@ -27,17 +27,18 @@ export class compareHighHands extends compareHighHandsHelpers{
             break;
          case "Two pairs":
             //need to check for non pair cards high card
-            this.compareTwoPairHighCards(this.playersHighHands);
+             this.compareTwoPairHighCards(this.playersHighHands);
             break;
          case "Full House":
             this.compareFullHouseCards(this.playersHighHands);
             break;
+         case "Pair":
+            this.comparePairHighCards(this.playersHighHands);
+            break;  //need to check for non pair cards high card
          case "Straight Flush":
          case "Flush":
          case "Straight":
          case "Three of a kind":
-         case "Pair":  //need to check for non pair cards high card
-
          case "High card":
          default :
             console.log("Reached compare high hands check");

@@ -1,5 +1,9 @@
 export let helpers = {
- 
+    // This is not being used
+    checkNonPairHandEquality(orderedCards, pairIndex = 0){
+        let highestNonPairKickerHand = orderedCards[0].handValue.nonPairs[pairIndex].value;
+        return [...orderedCards].filter(hand => highestNonPairKickerHand === hand.handValue.nonPairs[pairIndex].value);
+    },
     pairsCheck(cards){
         let pairs = [];
         // console.log({cards})
@@ -16,7 +20,6 @@ export let helpers = {
         return pairs;
     },
     getCardsValues(cardsArr) {
-       // console.log("getCardsValues, cardsArr:", cardsArr)
         let cardItemsWithValues = [];
         cardsArr.forEach(card => {
             let cardValue = card[1];

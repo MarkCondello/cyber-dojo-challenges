@@ -2046,7 +2046,27 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "helpers": () => (/* binding */ helpers)
 /* harmony export */ });
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 var helpers = {
+  // This is not being used
+  checkNonPairHandEquality: function checkNonPairHandEquality(orderedCards) {
+    var pairIndex = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+    var highestNonPairKickerHand = orderedCards[0].handValue.nonPairs[pairIndex].value;
+    return _toConsumableArray(orderedCards).filter(function (hand) {
+      return highestNonPairKickerHand === hand.handValue.nonPairs[pairIndex].value;
+    });
+  },
   pairsCheck: function pairsCheck(cards) {
     var pairs = []; // console.log({cards})
 
@@ -2066,7 +2086,6 @@ var helpers = {
     return pairs;
   },
   getCardsValues: function getCardsValues(cardsArr) {
-    // console.log("getCardsValues, cardsArr:", cardsArr)
     var cardItemsWithValues = [];
     cardsArr.forEach(function (card) {
       var cardValue = card[1];
@@ -2217,8 +2236,6 @@ var compareHighHandsHelpers = /*#__PURE__*/function () {
   }, {
     key: "compareTwoPairHighCards",
     value: function compareTwoPairHighCards() {
-      console.log("reached compareTwoPairHighCards");
-
       var playersHighPairValuesSorted = _toConsumableArray(this.playersHighHands).sort(function (playerA, playerB) {
         return playerB.handValue.highCard[0].value - playerA.handValue.highCard[0].value;
       }); //if there are no mathching high cards from players return the high hand
@@ -2233,20 +2250,18 @@ var compareHighHandsHelpers = /*#__PURE__*/function () {
         });
 
         if (playersSecondPairValuesFilteredAndSorted[0].handValue.highCard[1].value === playersSecondPairValuesFilteredAndSorted[1].handValue.highCard[1].value) {
-          //if second players have same second hand split pot
+          //if second players have same second hand  
           var matchingSecondCardHands = _toConsumableArray(playersSecondPairValuesFilteredAndSorted).filter(function (highHand) {
             return highHand.handValue.highCard[1].value === playersSecondPairValuesFilteredAndSorted[0].handValue.highCard[1].value;
-          }); //check for non pair hands, if the non pair items are not the same splitPotHands = null
-          //remove pairs and check the remainder
+          }); //check for non pair hands //remove pairs to compare kicker cards
 
 
-          var nonPairsHandSortedByValue = _toConsumableArray(matchingSecondCardHands).map(function (secondCardHand) {
+          var nonPairHandsSortedByValue = _toConsumableArray(matchingSecondCardHands).map(function (secondCardHand) {
             var pairs = [];
             pairs.push(secondCardHand.handValue.highCard[0].card.slice(1));
             pairs.push(secondCardHand.handValue.highCard[1].card.slice(1));
 
             var nonPairs = _toConsumableArray(secondCardHand.hand).filter(function (card) {
-              // get non pair cards
               return !pairs.includes(card.slice(1));
             });
 
@@ -2256,17 +2271,19 @@ var compareHighHandsHelpers = /*#__PURE__*/function () {
             return playerB.handValue.nonPairs[0].value - playerA.handValue.nonPairs[0].value;
           });
 
-          if (nonPairsHandSortedByValue[0].handValue.nonPairs[0].value > nonPairsHandSortedByValue[1].handValue.nonPairs[0].value) {
-            this.highestHand = nonPairsHandSortedByValue[0];
-            this.highestHand.handValue.kicker = nonPairsHandSortedByValue[0].handValue.nonPairs[0];
+          if (nonPairHandsSortedByValue[0].handValue.nonPairs[0].value > nonPairHandsSortedByValue[1].handValue.nonPairs[0].value) {
+            this.highestHand = nonPairHandsSortedByValue[0];
+            this.highestHand.handValue.kicker = nonPairHandsSortedByValue[0].handValue.nonPairs[0];
             this.highestHand.arrayIndex = this.getWinningHandIndex();
           } else {
-            this.splitPotHands = _toConsumableArray(matchingSecondCardHands);
-          }
+            var highestNonPairKickerHand = nonPairHandsSortedByValue[0].handValue.nonPairs[0].value,
+                highNonPairKickerHands = _toConsumableArray(nonPairHandsSortedByValue).filter(function (hand) {
+              return highestNonPairKickerHand === hand.handValue.nonPairs[0].value;
+            }); //need to set split pot hands to the cards with high non pairs
 
-          console.log({
-            nonPairsHandSortedByValue: nonPairsHandSortedByValue
-          });
+
+            this.splitPotHands = _toConsumableArray(highNonPairKickerHands);
+          }
         } else {
           this.highestHand = playersSecondPairValuesFilteredAndSorted[0];
           this.highestHand.handValue.kicker = playersSecondPairValuesFilteredAndSorted[0].handValue.highCard[1]; //return the hand with the high second card as kicker value
@@ -2275,6 +2292,75 @@ var compareHighHandsHelpers = /*#__PURE__*/function () {
         }
       } else {
         this.highestHand = playersHighPairValuesSorted.shift();
+        this.highestHand.arrayIndex = this.getWinningHandIndex();
+      }
+    }
+  }, {
+    key: "comparePairHighCards",
+    value: function comparePairHighCards() {
+      var _this = this;
+
+      var playersHighCardValuesSorted = _toConsumableArray(this.playersHighHands).sort(function (playerA, playerB) {
+        return playerB.handValue.highCard.value - playerA.handValue.highCard.value;
+      });
+
+      if (playersHighCardValuesSorted[0].handValue.highCard.value === playersHighCardValuesSorted[1].handValue.highCard.value) {
+        var highCardHandsFiltered = _toConsumableArray(playersHighCardValuesSorted).filter(function (highHand) {
+          return highHand.handValue.highCard.value === playersHighCardValuesSorted[0].handValue.highCard.value;
+        });
+
+        var nonPairHandsSortedByValue = _toConsumableArray(highCardHandsFiltered).map(function (highCardHand) {
+          //remove pairs to compare kicker cards
+          var pair = highCardHand.handValue.highCard.card.slice(1),
+              nonPairs = _toConsumableArray(highCardHand.hand).filter(function (card) {
+            return !pair.includes(card.slice(1));
+          });
+
+          highCardHand.handValue.nonPairs = _pokerHandHelpers_js__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(nonPairs, 'desc');
+          return highCardHand;
+        }).sort(function (playerA, playerB) {
+          return playerB.handValue.nonPairs[0].value - playerA.handValue.nonPairs[0].value;
+        });
+
+        var setWinningKickerHand = function setWinningKickerHand() {
+          var nonPairCardId = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+          var sortedCards = arguments.length > 1 ? arguments[1] : undefined;
+          var nthLabel = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "First";
+          console.log("".concat(nthLabel, " non pair check"), {
+            first: sortedCards[0].handValue.nonPairs[nonPairCardId].value,
+            second: sortedCards[1].handValue.nonPairs[nonPairCardId].value,
+            card: sortedCards[0].handValue.nonPairs[nonPairCardId].card
+          });
+          _this.highestHand = sortedCards[0];
+          _this.highestHand.kicker = sortedCards[0].handValue.nonPairs[nonPairCardId].card;
+          _this.highestHand.arrayIndex = _this.getWinningHandIndex();
+        }; //check highest nonPair hands from the 2 hands, there can not be more than 2 pairs of any card
+
+
+        if (nonPairHandsSortedByValue[0].handValue.nonPairs[0].value === nonPairHandsSortedByValue[1].handValue.nonPairs[0].value) {
+          var handsSortedBySecondNonPair = _toConsumableArray(nonPairHandsSortedByValue).sort(function (playerA, playerB) {
+            return playerB.handValue.nonPairs[1].value - playerA.handValue.nonPairs[1].value;
+          });
+
+          if (handsSortedBySecondNonPair[0].handValue.nonPairs[1].value === handsSortedBySecondNonPair[1].handValue.nonPairs[1].value) {
+            var handsSortedByThirdNonPair = _toConsumableArray(handsSortedBySecondNonPair).sort(function (playerA, playerB) {
+              return playerB.handValue.nonPairs[2].value - playerA.handValue.nonPairs[2].value;
+            });
+
+            if (handsSortedByThirdNonPair[0].handValue.nonPairs[2].value === handsSortedByThirdNonPair[1].handValue.nonPairs[2].value) {
+              this.splitPotHands = _toConsumableArray(handsSortedByThirdNonPair);
+            } else {
+              setWinningKickerHand(2, handsSortedByThirdNonPair, "Third");
+            }
+          } else {
+            setWinningKickerHand(1, handsSortedBySecondNonPair, "Second");
+          }
+        } else {
+          setWinningKickerHand(0, nonPairHandsSortedByValue, "First");
+        }
+      } else {
+        //if there are no matching high cards from the two players hands, return the first high hand
+        this.highestHand = playersHighCardValuesSorted[0];
         this.highestHand.arrayIndex = this.getWinningHandIndex();
       }
     }
@@ -2373,9 +2459,6 @@ var HandChecks = /*#__PURE__*/function () {
       var pairs = _pokerHandHelpers__WEBPACK_IMPORTED_MODULE_0__.helpers.pairsCheck(_toConsumableArray(this.playersCards));
 
       if (pairs.length >= 2) {
-        console.log({
-          pairs: pairs
-        });
         return this.rank = {
           value: 7,
           type: "Two pairs",
@@ -2722,12 +2805,15 @@ var compareHighHands = /*#__PURE__*/function (_compareHighHandsHelp) {
           this.compareFullHouseCards(this.playersHighHands);
           break;
 
+        case "Pair":
+          this.comparePairHighCards(this.playersHighHands);
+          break;
+        //need to check for non pair cards high card
+
         case "Straight Flush":
         case "Flush":
         case "Straight":
         case "Three of a kind":
-        case "Pair": //need to check for non pair cards high card
-
         case "High card":
         default:
           console.log("Reached compare high hands check");
@@ -2831,7 +2917,7 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
     {
       "id": 987789,
       "name": "black",
-      "hand": ["SA", "DA", "C2", "HK", "CK"]
+      "hand": ["CA", "DA", "C9", "H6", "CK"]
     }, {
       "id": 123321,
       "name": "white",
@@ -2839,7 +2925,7 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
     }, {
       "id": 345543,
       "name": "grey",
-      "hand": ["SK", "HK", "S2", "DA", "SA"]
+      "hand": ["SK", "D9", "S3", "DA", "SA"]
     } // {"id": 345543, "name":"red","hand":["D5","H6","H7","H8","H4"]},
     ],
     message: null

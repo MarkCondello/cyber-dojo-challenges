@@ -14,7 +14,6 @@ export default class HandChecks {
     twoPair(){
         let pairs = helpers.pairsCheck([...this.playersCards]);
         if(pairs.length >= 2){
-            console.log({pairs})
             return this.rank = {value: 7, type: "Two pairs", highCard: helpers.sortCardsByValues(pairs, 'desc')};
         }
         return false;
