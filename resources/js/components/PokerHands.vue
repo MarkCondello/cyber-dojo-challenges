@@ -29,7 +29,6 @@
             </template>
             <button v-else style="width: 100%;" @click.stop="dealCards" class="btn btn-primary">Deal</button>
         </template>
-
     </div>
 </template>
 

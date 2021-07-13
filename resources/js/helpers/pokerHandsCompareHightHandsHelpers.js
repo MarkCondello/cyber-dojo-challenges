@@ -71,15 +71,7 @@ export default class compareHighHandsHelpers {
                 highCardHand.handValue.nonPairs = helpers.sortCardsByValues(nonPairs, 'desc');
                 return highCardHand;
             }).sort((playerA, playerB) => playerB.handValue.nonPairs[0].value - playerA.handValue.nonPairs[0].value);
-
-            let setWinningKickerHand = (nonPairCardId = 0, sortedCards, nthLabel = "First") => {
-                console.log(`${nthLabel} non pair check`, {first: sortedCards[0].handValue.nonPairs[nonPairCardId].value, second: sortedCards[1].handValue.nonPairs[nonPairCardId].value , card: sortedCards[0].handValue.nonPairs[nonPairCardId].card})
-                this.highestHand = sortedCards[0];
-                this.highestHand.handValue.kicker = {
-                    card : sortedCards[0].handValue.nonPairs[nonPairCardId].card,
-                };
-                this.highestHand.arrayIndex = this.getWinningHandIndex();
-            }
+  
             //check highest nonPair hands from the 2 hands, there can not be more than 2 pairs of any card
             if(nonPairHandsSortedByValue[0].handValue.nonPairs[0].value === nonPairHandsSortedByValue[1].handValue.nonPairs[0].value){
                 let handsSortedBySecondNonPair = [...nonPairHandsSortedByValue].sort((playerA, playerB) => playerB.handValue.nonPairs[1].value - playerA.handValue.nonPairs[1].value)
@@ -88,13 +80,13 @@ export default class compareHighHandsHelpers {
                     if(handsSortedByThirdNonPair[0].handValue.nonPairs[2].value === handsSortedByThirdNonPair[1].handValue.nonPairs[2].value){
                         this.splitPotHands = [...handsSortedByThirdNonPair];
                     } else {
-                        setWinningKickerHand(2, handsSortedByThirdNonPair, "Third")
+                        this.setWinningKickerHand(2, handsSortedByThirdNonPair, "Third")
                     }
                 } else {
-                    setWinningKickerHand(1, handsSortedBySecondNonPair, "Second")
+                    this.setWinningKickerHand(1, handsSortedBySecondNonPair, "Second")
                 }
             } else {
-                setWinningKickerHand(0, nonPairHandsSortedByValue, "First")
+                this.setWinningKickerHand(0, nonPairHandsSortedByValue, "First")
             }
         } else { //if there are no matching high cards from the two players hands, return the first high hand
             this.highestHand = playersHighCardValuesSorted[0];
@@ -102,11 +94,60 @@ export default class compareHighHandsHelpers {
         }
     }
     compareCards(){
-        
+        let playersFirstHighCardsSorted = [...this.playersHighHands]
+        .map(playersHand => {
+            playersHand.handValue = {
+                ...playersHand.handValue,
+                nonPairs: helpers.sortCardsByValues(playersHand.hand, 'desc'),
+            }
+            return playersHand;
+        })
+        .sort((playerA, playerB) => playerB.handValue.nonPairs[0].value - playerA.handValue.nonPairs[0].value)
+        //if the first sorted hands first non pair = the second hands first non pair
+        if (playersFirstHighCardsSorted[0].handValue.nonPairs[0].value === playersFirstHighCardsSorted[1].handValue.nonPairs[0].value) {
+            // ADD filter by first card and sort by 2nd non pair
+            let filteredByFirstCardOrderedBySecond = this.filterByCardIndexOrderByCardIndex(playersFirstHighCardsSorted, 0, 1);
+            // console.log({filteredByFirstCardOrderedBySecond})
+            //if the first sorted hands second non pair = the second hands second non pair
+            if (filteredByFirstCardOrderedBySecond[0].handValue.nonPairs[1].value === filteredByFirstCardOrderedBySecond[1].handValue.nonPairs[1].value) {
+            // ADD filter by second card and sort by 3nd non pair
+                let filteredBySecondCardOrderedByThird = this.filterByCardIndexOrderByCardIndex(filteredByFirstCardOrderedBySecond, 1, 2);
+                // console.log({filteredBySecondCardOrderedByThird})
+                //if the first sorted hands secothirdnd non pair = the second hands third non pair
+                if (filteredBySecondCardOrderedByThird[0].handValue.nonPairs[2].value === filteredBySecondCardOrderedByThird[1].handValue.nonPairs[2].value) {
+            // ADD filter by third card and sort by 4th non pair
+                    let filteredByThirdCardOrderedByFourth = this.filterByCardIndexOrderByCardIndex(filteredBySecondCardOrderedByThird, 2, 3);
+                    // console.log({filteredByThirdCardOrderedByFourth})
+            //         //if the first sorted hands fourth non pair = the second hands third non pair
+                        if (filteredByThirdCardOrderedByFourth[0].handValue.nonPairs[3].value === filteredByThirdCardOrderedByFourth[1].handValue.nonPairs[3].value) {
+                        // ADD filter by fourth card and sort by 5th non pair
+                        let filteredByFourthCardOrderedByFifth = this.filterByCardIndexOrderByCardIndex(filteredByThirdCardOrderedByFourth, 3, 4);
+                        // console.log({filteredByFourthCardOrderedByFifth})
+            //                 //if the first sorted hands fifth non pair = the second hands fifth non pair
+                        if (filteredByFourthCardOrderedByFifth[0].handValue.nonPairs[4].value === filteredByFourthCardOrderedByFifth[1].handValue.nonPairs[4].value) {
+                            //set split pot for filtered cards
+                            this.splitPotHands = filteredByFourthCardOrderedByFifth;
+                        } else {
+                            this.setWinningKickerHand(4, filteredByFourthCardOrderedByFifth, "Fifth");
+                        }
+                    } else {
+                        this.setWinningKickerHand(3, filteredByThirdCardOrderedByFourth, "Fourth");
+                    }
+                } else {
+                    this.setWinningKickerHand(2, filteredBySecondCardOrderedByThird, "Third");
+                }
+            } else {
+                this.setWinningKickerHand(1, filteredByFirstCardOrderedBySecond, "Second");
+            }
+        } else {
+            this.setWinningKickerHand(0, playersFirstHighCardsSorted, "First");
+        }
     }
-
-
-
+    filterByCardIndexOrderByCardIndex(playersCards, filterIndex, sortIndex){
+        return playersCards
+        .filter(cards => cards.handValue.nonPairs[filterIndex].value === playersCards[0].handValue.nonPairs[filterIndex].value)
+        .sort((playerA, playerB) => playerB.handValue.nonPairs[sortIndex].value - playerA.handValue.nonPairs[sortIndex].value)
+    }
     compareHighCards() {
         let playersHighCardValuesSorted = [...this.playersHighHands].sort((playerA, playerB) => playerB.handValue.highCard.value - playerA.handValue.highCard.value);
         if (playersHighCardValuesSorted[0].handValue.highCard.value === playersHighCardValuesSorted[1].handValue.highCard.value) {
@@ -116,5 +157,13 @@ export default class compareHighHandsHelpers {
             this.highestHand = playersHighCardValuesSorted[0];
             this.highestHand.arrayIndex = this.getWinningHandIndex();
         }
+    }
+    setWinningKickerHand(nonPairCardId = 0, sortedCards, nthLabel = "First"){
+        console.log(`${nthLabel} non pair check`, {first: sortedCards[0].handValue.nonPairs[nonPairCardId].value, second: sortedCards[1].handValue.nonPairs[nonPairCardId].value , card: sortedCards[0].handValue.nonPairs[nonPairCardId].card})
+        this.highestHand = sortedCards[0];
+        this.highestHand.handValue.kicker = {
+            card : sortedCards[0].handValue.nonPairs[nonPairCardId].card,
+        };
+        this.highestHand.arrayIndex = this.getWinningHandIndex();
     }
 }

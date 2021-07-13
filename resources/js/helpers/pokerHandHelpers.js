@@ -65,7 +65,6 @@ export let helpers = {
         });
         return cardItemsWithValues;
     },
-
     // helper for 4 and 3 of a kind and flushes
     getCardMatches(cardsArr, index){
         let cardValue = cardsArr.splice(0, 1)[0], 
@@ -79,7 +78,6 @@ export let helpers = {
         })
         return matches;
     },
-
     sortCardsByValues(cards, dir = 'asc'){
         if(dir === 'asc'){
             return this.getCardsValues(cards).sort((first, second) => first.value - second.value);

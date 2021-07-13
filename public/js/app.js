@@ -1897,7 +1897,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
-//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Poker-Hands",
@@ -2178,6 +2177,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* binding */ compareHighHandsHelpers)
 /* harmony export */ });
 /* harmony import */ var _pokerHandHelpers_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./pokerHandHelpers.js */ "./resources/js/helpers/pokerHandHelpers.js");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -2298,8 +2303,6 @@ var compareHighHandsHelpers = /*#__PURE__*/function () {
   }, {
     key: "comparePairHighCards",
     value: function comparePairHighCards() {
-      var _this = this;
-
       var playersHighCardValuesSorted = _toConsumableArray(this.playersHighHands).sort(function (playerA, playerB) {
         return playerB.handValue.highCard.value - playerA.handValue.highCard.value;
       });
@@ -2320,23 +2323,7 @@ var compareHighHandsHelpers = /*#__PURE__*/function () {
           return highCardHand;
         }).sort(function (playerA, playerB) {
           return playerB.handValue.nonPairs[0].value - playerA.handValue.nonPairs[0].value;
-        });
-
-        var setWinningKickerHand = function setWinningKickerHand() {
-          var nonPairCardId = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-          var sortedCards = arguments.length > 1 ? arguments[1] : undefined;
-          var nthLabel = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "First";
-          console.log("".concat(nthLabel, " non pair check"), {
-            first: sortedCards[0].handValue.nonPairs[nonPairCardId].value,
-            second: sortedCards[1].handValue.nonPairs[nonPairCardId].value,
-            card: sortedCards[0].handValue.nonPairs[nonPairCardId].card
-          });
-          _this.highestHand = sortedCards[0];
-          _this.highestHand.handValue.kicker = {
-            card: sortedCards[0].handValue.nonPairs[nonPairCardId].card
-          };
-          _this.highestHand.arrayIndex = _this.getWinningHandIndex();
-        }; //check highest nonPair hands from the 2 hands, there can not be more than 2 pairs of any card
+        }); //check highest nonPair hands from the 2 hands, there can not be more than 2 pairs of any card
 
 
         if (nonPairHandsSortedByValue[0].handValue.nonPairs[0].value === nonPairHandsSortedByValue[1].handValue.nonPairs[0].value) {
@@ -2352,19 +2339,80 @@ var compareHighHandsHelpers = /*#__PURE__*/function () {
             if (handsSortedByThirdNonPair[0].handValue.nonPairs[2].value === handsSortedByThirdNonPair[1].handValue.nonPairs[2].value) {
               this.splitPotHands = _toConsumableArray(handsSortedByThirdNonPair);
             } else {
-              setWinningKickerHand(2, handsSortedByThirdNonPair, "Third");
+              this.setWinningKickerHand(2, handsSortedByThirdNonPair, "Third");
             }
           } else {
-            setWinningKickerHand(1, handsSortedBySecondNonPair, "Second");
+            this.setWinningKickerHand(1, handsSortedBySecondNonPair, "Second");
           }
         } else {
-          setWinningKickerHand(0, nonPairHandsSortedByValue, "First");
+          this.setWinningKickerHand(0, nonPairHandsSortedByValue, "First");
         }
       } else {
         //if there are no matching high cards from the two players hands, return the first high hand
         this.highestHand = playersHighCardValuesSorted[0];
         this.highestHand.arrayIndex = this.getWinningHandIndex();
       }
+    }
+  }, {
+    key: "compareCards",
+    value: function compareCards() {
+      var playersFirstHighCardsSorted = _toConsumableArray(this.playersHighHands).map(function (playersHand) {
+        playersHand.handValue = _objectSpread(_objectSpread({}, playersHand.handValue), {}, {
+          nonPairs: _pokerHandHelpers_js__WEBPACK_IMPORTED_MODULE_0__.helpers.sortCardsByValues(playersHand.hand, 'desc')
+        });
+        return playersHand;
+      }).sort(function (playerA, playerB) {
+        return playerB.handValue.nonPairs[0].value - playerA.handValue.nonPairs[0].value;
+      }); //if the first sorted hands first non pair = the second hands first non pair
+
+
+      if (playersFirstHighCardsSorted[0].handValue.nonPairs[0].value === playersFirstHighCardsSorted[1].handValue.nonPairs[0].value) {
+        // ADD filter by first card and sort by 2nd non pair
+        var filteredByFirstCardOrderedBySecond = this.filterByCardIndexOrderByCardIndex(playersFirstHighCardsSorted, 0, 1); // console.log({filteredByFirstCardOrderedBySecond})
+        //if the first sorted hands second non pair = the second hands second non pair
+
+        if (filteredByFirstCardOrderedBySecond[0].handValue.nonPairs[1].value === filteredByFirstCardOrderedBySecond[1].handValue.nonPairs[1].value) {
+          // ADD filter by second card and sort by 3nd non pair
+          var filteredBySecondCardOrderedByThird = this.filterByCardIndexOrderByCardIndex(filteredByFirstCardOrderedBySecond, 1, 2); // console.log({filteredBySecondCardOrderedByThird})
+          //if the first sorted hands secothirdnd non pair = the second hands third non pair
+
+          if (filteredBySecondCardOrderedByThird[0].handValue.nonPairs[2].value === filteredBySecondCardOrderedByThird[1].handValue.nonPairs[2].value) {
+            // ADD filter by third card and sort by 4th non pair
+            var filteredByThirdCardOrderedByFourth = this.filterByCardIndexOrderByCardIndex(filteredBySecondCardOrderedByThird, 2, 3); // console.log({filteredByThirdCardOrderedByFourth})
+            //         //if the first sorted hands fourth non pair = the second hands third non pair
+
+            if (filteredByThirdCardOrderedByFourth[0].handValue.nonPairs[3].value === filteredByThirdCardOrderedByFourth[1].handValue.nonPairs[3].value) {
+              // ADD filter by fourth card and sort by 5th non pair
+              var filteredByFourthCardOrderedByFifth = this.filterByCardIndexOrderByCardIndex(filteredByThirdCardOrderedByFourth, 3, 4); // console.log({filteredByFourthCardOrderedByFifth})
+              //                 //if the first sorted hands fifth non pair = the second hands fifth non pair
+
+              if (filteredByFourthCardOrderedByFifth[0].handValue.nonPairs[4].value === filteredByFourthCardOrderedByFifth[1].handValue.nonPairs[4].value) {
+                //set split pot for filtered cards
+                this.splitPotHands = filteredByFourthCardOrderedByFifth;
+              } else {
+                this.setWinningKickerHand(4, filteredByFourthCardOrderedByFifth, "Fifth");
+              }
+            } else {
+              this.setWinningKickerHand(3, filteredByThirdCardOrderedByFourth, "Fourth");
+            }
+          } else {
+            this.setWinningKickerHand(2, filteredBySecondCardOrderedByThird, "Third");
+          }
+        } else {
+          this.setWinningKickerHand(1, filteredByFirstCardOrderedBySecond, "Second");
+        }
+      } else {
+        this.setWinningKickerHand(0, playersFirstHighCardsSorted, "First");
+      }
+    }
+  }, {
+    key: "filterByCardIndexOrderByCardIndex",
+    value: function filterByCardIndexOrderByCardIndex(playersCards, filterIndex, sortIndex) {
+      return playersCards.filter(function (cards) {
+        return cards.handValue.nonPairs[filterIndex].value === playersCards[0].handValue.nonPairs[filterIndex].value;
+      }).sort(function (playerA, playerB) {
+        return playerB.handValue.nonPairs[sortIndex].value - playerA.handValue.nonPairs[sortIndex].value;
+      });
     }
   }, {
     key: "compareHighCards",
@@ -2384,6 +2432,23 @@ var compareHighHandsHelpers = /*#__PURE__*/function () {
         this.highestHand = playersHighCardValuesSorted[0];
         this.highestHand.arrayIndex = this.getWinningHandIndex();
       }
+    }
+  }, {
+    key: "setWinningKickerHand",
+    value: function setWinningKickerHand() {
+      var nonPairCardId = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+      var sortedCards = arguments.length > 1 ? arguments[1] : undefined;
+      var nthLabel = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "First";
+      console.log("".concat(nthLabel, " non pair check"), {
+        first: sortedCards[0].handValue.nonPairs[nonPairCardId].value,
+        second: sortedCards[1].handValue.nonPairs[nonPairCardId].value,
+        card: sortedCards[0].handValue.nonPairs[nonPairCardId].card
+      });
+      this.highestHand = sortedCards[0];
+      this.highestHand.handValue.kicker = {
+        card: sortedCards[0].handValue.nonPairs[nonPairCardId].card
+      };
+      this.highestHand.arrayIndex = this.getWinningHandIndex();
     }
   }]);
 
@@ -2710,7 +2775,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "compareHighHands": () => (/* binding */ compareHighHands),
 /* harmony export */   "getHandValue": () => (/* binding */ getHandValue),
-/* harmony export */   "deck": () => (/* binding */ deck)
+/* harmony export */   "deck": () => (/* binding */ deck),
+/* harmony export */   "adjectives": () => (/* binding */ adjectives),
+/* harmony export */   "animals": () => (/* binding */ animals)
 /* harmony export */ });
 /* harmony import */ var _helpers_pokerHandsHandChecks__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../helpers/pokerHandsHandChecks */ "./resources/js/helpers/pokerHandsHandChecks.js");
 /* harmony import */ var _helpers_pokerHandsCompareHightHandsHelpers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helpers/pokerHandsCompareHightHandsHelpers */ "./resources/js/helpers/pokerHandsCompareHightHandsHelpers.js");
@@ -2812,13 +2879,16 @@ var compareHighHands = /*#__PURE__*/function (_compareHighHandsHelp) {
           break;
         //need to check for non pair cards high card
 
+        case "High card":
+          this.compareCards(this.playersHighHands);
+          break;
+
         case "Straight Flush":
         case "Flush":
         case "Straight":
         case "Three of a kind":
         case "High card":
         default:
-          console.log("Reached compare high hands check");
           this.compareHighCards(this.playersHighHands);
           break;
       }
@@ -2862,6 +2932,8 @@ var deck = suits.map(function (suit) {
     return suit + card;
   });
 }).flat();
+var adjectives = ["adorable", "adventurous", "aggressive", "agreeable", "alert", "alive", "amused", "angry", "annoyed", "annoying", "anxious", "arrogant", "ashamed", "attractive", "average", "awful", "bad", "beautiful", "better", "bewildered", "black", "bloody", "blue", "blue-eyed", "blushing", "bored", "brainy", "brave", "breakable", "bright", "busy", "calm", "careful", "cautious", "charming", "cheerful", "clean", "clear", "clever", "cloudy", "clumsy", "colorful", "combative", "comfortable", "concerned", "condemned", "confused", "cooperative", "courageous", "crazy", "creepy", "crowded", "cruel", "curious", "cute", "dangerous", "dark", "dead", "defeated", "defiant", "delightful", "depressed", "determined", "different", "difficult", "disgusted", "distinct", "disturbed", "dizzy", "doubtful", "drab", "dull"];
+var animals = ["Aardvark", "Addax", "Adelie Penguin", "African Elephant", "African Forest Elephant", "African Lions", "African Penguin", "African Spurred Tortoise", "African Wild Dog", "Africanized Bees", "Allen’s Swamp Monkeys", "Alligator", "Allis Shad", "Alpine Ibex", "Amazonian Manatee", "American Oystercatcher Bird", "Anaconda Snake", "Ants", "Aquatic Warbler", "Arctic Wolf", "Armadillo", "Asian Elephant", "Asian Lion", "Atlantic Puffin", "Atlantic Spotted Dolphins", "Atlas Beetle", "Audubon’s Shearwater", "Australasian Grebe", "Australian Dingo", "Australian Pelican", "Australian Swiftlet", "Bactrian Camels", "Badger", "Bean Goose", "Bees", "Beetle", "Bengal Tigers", "Big Eyed Squirrel Fish", "Bison", "Black Caimans", "Black House Spider", "Black Mamba Snakes", "Black Necked Stilt", "Black Rhinoceros", "Black Widow Spider", "Blacktip Reef Shark", "Blacktip Shark", "Blister Beetle", "Blue and Yellow Macaw", "Blue Whale", "Blue-footed Booby Bird", "Boa Constrictor Snake", "Bottlenose Dolphins", "Bowhead Whale", "Brandling Worms", "Brazilian Wandering Spider", "British Mice", "British Moles", "British Water Vole", "British Wild Cats", "Broad-Snouted Caimans", "Brown Recluse Spider", "Brown Trout", "Bumble Bees", "Burying Beetle", "Butterflies", "Camels", "Campbell’s Dwarf Hamster", "Cape Gannet Bird", "Capercaillie", "Capuchin Monkeys", "Capybara", "Caracal", "Cardinal Birds", "Caribbean Reef Shark", "Caribou", "Cats", "Centipede", "Cheetah", "Chickaree", "Chickens", "Chimpanzee", "Chinchilla", "Chinese Hamsters", "Chinstrap Penguin", "Chipmunk", "Christmas Beetle", "Cicada Killer Wasps", "Click Beetle", "Commerson Dolphin", "Common Buzzard", "Common Dolphin", "Common Frog", "Common Hippopotamus", "Common Kingfisher", "Common Lizard", "Common Newt", "Common Palm Civet", "Common Seal", "Common Toad"];
 
 /***/ }),
 
@@ -2914,22 +2986,23 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new vuex__WEBPACK_IMPORTED_MODULE_4__.default.Store({
   state: {
     deck: _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.deck,
-    players: [// CHeck against next highest and next lowest hand, split pot, highest hand
-    // Remove this after doing compare checks
-    {
+    players: [{
       "id": 987789,
       "name": "black",
-      "hand": ["CA", "DA", "C9", "H6", "CK"]
+      "hand": ["CA", "CJ", "CQ", "H6", "CK"]
     }, {
       "id": 123321,
       "name": "white",
-      "hand": ["S7", "D3", "C5", "S8", "D5"]
+      "hand": ["DQ", "DJ", "C4", "DK", "DA"]
     }, {
       "id": 345543,
       "name": "grey",
-      "hand": ["SK", "D9", "S3", "D4", "SA"]
-    } // {"id": 345543, "name":"red","hand":["D5","H6","H7","H8","H4"]},
-    ],
+      "hand": ["SK", "SJ", "S10", "HA", "S2"]
+    }, {
+      "id": 343554,
+      "name": "red",
+      "hand": ["D2", "HJ", "HQ", "H8", "HK"]
+    }],
     message: null
   },
   mutations: {

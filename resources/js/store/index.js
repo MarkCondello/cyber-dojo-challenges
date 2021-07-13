@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Vuex from 'vuex';
-import {deck, getHandValue, compareHighHands} from "../service/PokerHands";
+import {deck, getHandValue, compareHighHands, animals, adjectives} from "../service/PokerHands";
 import textFormatting from "../helpers/textFormatting";
 
 Vue.use(Vuex);
@@ -9,12 +9,10 @@ export default new Vuex.Store({
     state: {
         deck,
         players: [
-            // CHeck against next highest and next lowest hand, split pot, highest hand
-            // Remove this after doing compare checks
-            {"id": 987789, "name":"black","hand":["CA","DA","C9","H6","CK"]},
-            {"id": 123321, "name":"white","hand":["S7","D3","C5","S8","D5"]},
-            {"id": 345543, "name":"grey","hand":["SK","D9","S3","D4","SA"]},
-            // {"id": 345543, "name":"red","hand":["D5","H6","H7","H8","H4"]},
+            {"id": 987789, "name":"black","hand":["CA","CJ","CQ","H6","CK"]},
+            {"id": 123321, "name":"white","hand":["DQ","DJ","C4","DK","DA"]},
+            {"id": 345543, "name":"grey","hand":["SK","SJ","S10","HA","S2"]},
+            {"id": 343554, "name":"red","hand":["D2","HJ","HQ","H8","HK"]},
         ],
         message: null,
     },
