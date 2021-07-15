@@ -74,7 +74,7 @@ export class getHandValue extends handChecks{
 
 const suits = ["H", "D", "C", "S"],
 cards = [ "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
-export const deck = suits.map(suit => {
+export const deckOfCards = suits.map(suit => {
    return cards.map(card => {
         return suit + card;
     });

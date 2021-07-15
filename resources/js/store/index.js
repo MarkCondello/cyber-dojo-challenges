@@ -1,18 +1,18 @@
 import Vue from "vue";
 import Vuex from 'vuex';
-import {deck, getHandValue, compareHighHands, animals, adjectives} from "../service/PokerHands";
+import {deckOfCards, getHandValue, compareHighHands, animals, adjectives} from "../service/PokerHands";
 import textFormatting from "../helpers/textFormatting";
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
     state: {
-        deck,
+        deck: [...deckOfCards],
         players: [
-            {"id": 987789, "name":"black","hand":["CA","CJ","CQ","H6","CK"]},
-            {"id": 123321, "name":"white","hand":["DQ","DJ","C4","DK","DA"]},
-            {"id": 345543, "name":"grey","hand":["SK","SJ","S10","HA","S2"]},
-            {"id": 343554, "name":"red","hand":["D2","HJ","HQ","H8","HK"]},
+            // {"id": 987789, "name":"black","hand":["CA","CJ","CQ","H6","CK"]},
+            // {"id": 123321, "name":"white","hand":["DQ","DJ","C4","DK","DA"]},
+            // {"id": 345543, "name":"grey","hand":["SK","SJ","S10","HA","S2"]},
+            // {"id": 343554, "name":"red","hand":["D2","HJ","HQ","H8","HK"]},
         ],
         message: null,
     },
@@ -44,17 +44,49 @@ export default new Vuex.Store({
                     }
                 })
             });
-        }
-
+        },
+        SET_CARDS(state){
+            state.deck = [...deckOfCards];
+        },
+        SET_HANDS(state){
+            state.players = state.players.map(player => {
+                player.hand = [];
+                return player;
+            });
+        },
+        SET_MESSAGE(state){
+            state.message = null
+        },
     },
     actions: {
-        addPlayers({commit}, {players}){
+        resetGame({commit}){
+            commit("SET_CARDS");
+            commit("SET_HANDS");
+            commit("SET_MESSAGE")
+        },
+        addPlayers({commit},  playersName){
+            let players = [];
+            players.push({
+                id: 123,
+                name: playersName,
+                hand:[],
+            });
+            for(let i = 0; i < 5; i++){
+                players.push(
+                    {
+                        id: Math.floor(Math.random() * 1000),
+                        name: `${textFormatting.ucFirst(adjectives[Math.floor(Math.random() * adjectives.length)])} ${animals[Math.floor(Math.random() * animals.length)]}`,
+                        hand:[],
+                    }
+                )
+            }
             commit("SET_PLAYERS", players);
         },
         dealCards(
             { state, commit, getters },
         ){
             let i = 0;
+            console.log("reached deal cards", i);
             while(i < 5){
                 for(let j = 0; j < state.players.length; j++) {
                     let cardIndex = getters.randomCardIndex,

@@ -1,14 +1,18 @@
 <template>
     <div class="poker-hands">
-        <template v-if="this.players">
-            <h1>POKER HANDS</h1><!-- should use a computed method to check each player has their hand -->
+        <h1>POKER HANDS</h1> 
+        <template v-if="!this.players.length">
+            <label for="playersName">Add your name:</label>
+            <input type="text" v-model="playersName" name="playersName"/>
+            <button @click.stop="handleClickStart">Start</button>
+        </template>
+        <template v-else>
             <template v-if="players[0].hand.length">
                 <template v-if="message">
                     <h3 v-text="message"></h3>
-                    <!-- Add button to play again -->
+                    <button @click.stop="handClickDealAgain" class="btn btn-primary">Deal Again</button>
                 </template>
                 <button v-else style="width: 100%;" @click.stop="handleGetWinner" class="btn btn-primary">Who wins?</button>
-        <!-- Show winners hand with meta -->
                 <div class="container">
                     <article v-for="(player, pid) in this.players" :key="pid">
                         <h2>{{player.name}}</h2>
@@ -27,32 +31,47 @@
                     </article>
                 </div>
             </template>
-            <button v-else style="width: 100%;" @click.stop="dealCards" class="btn btn-primary">Deal</button>
         </template>
     </div>
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from "vuex";
+import { mapState, mapActions } from "vuex";
 export default {
     name: "Poker-Hands",
-    props: {
-        playerItems: {
-            type: Array,
-            required: true,
+    // props: {
+    //     playerItems: {
+    //         type: Array,
+    //         required: true,
+    //     }
+    // },
+    data() {
+        return {
+            playersName: '',
         }
     },
-    created() {
-        // Add this back in after testings
-        // this.addPlayers({players: this.playerItems});
-    },
+    // created() {
+    //     // Add this back in after testings
+    //     //this.addPlayers({players: this.playerItems});
+       
+    // },
     computed: {
         ...mapState(['players', 'message']),
     },
     methods: {
-        ...mapActions(['dealCards', 'addPlayers', 'winningHand']),
-         handleGetWinner(){
-            this.winningHand()
+        ...mapActions(['dealCards', 'addPlayers', 'winningHand', 'resetGame']),
+        async handleClickStart(){
+             if(this.playersName.length > 3){
+                await this.addPlayers(this.playersName);
+                this.dealCards();
+            }
+        },
+        async handClickDealAgain(){
+            await this.resetGame();
+            this.dealCards();
+        },
+        handleGetWinner(){
+            this.winningHand();
         },
         cardSuit(suit){
             switch(suit){
@@ -66,7 +85,7 @@ export default {
                     return '&clubs;';
             }
         },
-         cardColor(suit){
+        cardColor(suit){
             switch(suit){
                 case('H'):
                 case('D'):

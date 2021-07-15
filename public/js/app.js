@@ -1856,7 +1856,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -1897,20 +1905,78 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Poker-Hands",
-  props: {
-    playerItems: {
-      type: Array,
-      required: true
-    }
+  // props: {
+  //     playerItems: {
+  //         type: Array,
+  //         required: true,
+  //     }
+  // },
+  data: function data() {
+    return {
+      playersName: ''
+    };
   },
-  created: function created() {// Add this back in after testings
-    // this.addPlayers({players: this.playerItems});
-  },
-  computed: _objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapState)(['players', 'message'])),
-  methods: _objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapActions)(['dealCards', 'addPlayers', 'winningHand'])), {}, {
+  // created() {
+  //     // Add this back in after testings
+  //     //this.addPlayers({players: this.playerItems});
+  // },
+  computed: _objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_1__.mapState)(['players', 'message'])),
+  methods: _objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_1__.mapActions)(['dealCards', 'addPlayers', 'winningHand', 'resetGame'])), {}, {
+    handleClickStart: function handleClickStart() {
+      var _this = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                if (!(_this.playersName.length > 3)) {
+                  _context.next = 4;
+                  break;
+                }
+
+                _context.next = 3;
+                return _this.addPlayers(_this.playersName);
+
+              case 3:
+                _this.dealCards();
+
+              case 4:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }))();
+    },
+    handClickDealAgain: function handClickDealAgain() {
+      var _this2 = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.next = 2;
+                return _this2.resetGame();
+
+              case 2:
+                _this2.dealCards();
+
+              case 3:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2);
+      }))();
+    },
     handleGetWinner: function handleGetWinner() {
       this.winningHand();
     },
@@ -2775,7 +2841,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "compareHighHands": () => (/* binding */ compareHighHands),
 /* harmony export */   "getHandValue": () => (/* binding */ getHandValue),
-/* harmony export */   "deck": () => (/* binding */ deck),
+/* harmony export */   "deckOfCards": () => (/* binding */ deckOfCards),
 /* harmony export */   "adjectives": () => (/* binding */ adjectives),
 /* harmony export */   "animals": () => (/* binding */ animals)
 /* harmony export */ });
@@ -2927,7 +2993,7 @@ var getHandValue = /*#__PURE__*/function (_handChecks) {
 }(_helpers_pokerHandsHandChecks__WEBPACK_IMPORTED_MODULE_0__.default);
 var suits = ["H", "D", "C", "S"],
     cards = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
-var deck = suits.map(function (suit) {
+var deckOfCards = suits.map(function (suit) {
   return cards.map(function (card) {
     return suit + card;
   });
@@ -2960,6 +3026,12 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -2974,35 +3046,17 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
 
 
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-
-
 
 
 vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.default);
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (new vuex__WEBPACK_IMPORTED_MODULE_4__.default.Store({
   state: {
-    deck: _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.deck,
-    players: [{
-      "id": 987789,
-      "name": "black",
-      "hand": ["CA", "CJ", "CQ", "H6", "CK"]
-    }, {
-      "id": 123321,
-      "name": "white",
-      "hand": ["DQ", "DJ", "C4", "DK", "DA"]
-    }, {
-      "id": 345543,
-      "name": "grey",
-      "hand": ["SK", "SJ", "S10", "HA", "S2"]
-    }, {
-      "id": 343554,
-      "name": "red",
-      "hand": ["D2", "HJ", "HQ", "H8", "HK"]
-    }],
+    deck: _toConsumableArray(_service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.deckOfCards),
+    players: [// {"id": 987789, "name":"black","hand":["CA","CJ","CQ","H6","CK"]},
+      // {"id": 123321, "name":"white","hand":["DQ","DJ","C4","DK","DA"]},
+      // {"id": 345543, "name":"grey","hand":["SK","SJ","S10","HA","S2"]},
+      // {"id": 343554, "name":"red","hand":["D2","HJ","HQ","H8","HK"]},
+    ],
     message: null
   },
   mutations: {
@@ -3042,12 +3096,44 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
           }
         });
       });
+    },
+    SET_CARDS: function SET_CARDS(state) {
+      state.deck = _toConsumableArray(_service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.deckOfCards);
+    },
+    SET_HANDS: function SET_HANDS(state) {
+      state.players = state.players.map(function (player) {
+        player.hand = [];
+        return player;
+      });
+    },
+    SET_MESSAGE: function SET_MESSAGE(state) {
+      state.message = null;
     }
   },
   actions: {
-    addPlayers: function addPlayers(_ref5, _ref6) {
+    resetGame: function resetGame(_ref5) {
       var commit = _ref5.commit;
-      var players = _ref6.players;
+      commit("SET_CARDS");
+      commit("SET_HANDS");
+      commit("SET_MESSAGE");
+    },
+    addPlayers: function addPlayers(_ref6, playersName) {
+      var commit = _ref6.commit;
+      var players = [];
+      players.push({
+        id: 123,
+        name: playersName,
+        hand: []
+      });
+
+      for (var i = 0; i < 5; i++) {
+        players.push({
+          id: Math.floor(Math.random() * 1000),
+          name: "".concat(_helpers_textFormatting__WEBPACK_IMPORTED_MODULE_2__.default.ucFirst(_service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.adjectives[Math.floor(Math.random() * _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.adjectives.length)]), " ").concat(_service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.animals[Math.floor(Math.random() * _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.animals.length)]),
+          hand: []
+        });
+      }
+
       commit("SET_PLAYERS", players);
     },
     dealCards: function dealCards(_ref7) {
@@ -3055,6 +3141,7 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
           commit = _ref7.commit,
           getters = _ref7.getters;
       var i = 0;
+      console.log("reached deal cards", i);
 
       while (i < 5) {
         for (var j = 0; j < state.players.length; j++) {
@@ -39502,17 +39589,70 @@ var render = function() {
     "div",
     { staticClass: "poker-hands" },
     [
-      this.players
+      _c("h1", [_vm._v("POKER HANDS")]),
+      _vm._v(" "),
+      !this.players.length
         ? [
-            _c("h1", [_vm._v("POKER HANDS")]),
+            _c("label", { attrs: { for: "playersName" } }, [
+              _vm._v("Add your name:")
+            ]),
             _vm._v(" "),
+            _c("input", {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.playersName,
+                  expression: "playersName"
+                }
+              ],
+              attrs: { type: "text", name: "playersName" },
+              domProps: { value: _vm.playersName },
+              on: {
+                input: function($event) {
+                  if ($event.target.composing) {
+                    return
+                  }
+                  _vm.playersName = $event.target.value
+                }
+              }
+            }),
+            _vm._v(" "),
+            _c(
+              "button",
+              {
+                on: {
+                  click: function($event) {
+                    $event.stopPropagation()
+                    return _vm.handleClickStart($event)
+                  }
+                }
+              },
+              [_vm._v("Start")]
+            )
+          ]
+        : [
             _vm.players[0].hand.length
               ? [
                   _vm.message
                     ? [
                         _c("h3", {
                           domProps: { textContent: _vm._s(_vm.message) }
-                        })
+                        }),
+                        _vm._v(" "),
+                        _c(
+                          "button",
+                          {
+                            staticClass: "btn btn-primary",
+                            on: {
+                              click: function($event) {
+                                $event.stopPropagation()
+                                return _vm.handClickDealAgain($event)
+                              }
+                            }
+                          },
+                          [_vm._v("Deal Again")]
+                        )
                       ]
                     : _c(
                         "button",
@@ -39577,22 +39717,8 @@ var render = function() {
                     0
                   )
                 ]
-              : _c(
-                  "button",
-                  {
-                    staticClass: "btn btn-primary",
-                    staticStyle: { width: "100%" },
-                    on: {
-                      click: function($event) {
-                        $event.stopPropagation()
-                        return _vm.dealCards($event)
-                      }
-                    }
-                  },
-                  [_vm._v("Deal")]
-                )
+              : _vm._e()
           ]
-        : _vm._e()
     ],
     2
   )
