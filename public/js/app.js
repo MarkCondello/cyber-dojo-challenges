@@ -2931,31 +2931,42 @@ var compareHighHands = /*#__PURE__*/function (_compareHighHandsHelp) {
           this.splitPotHands = this.playersHighHands;
           break;
 
-        case "Two pairs":
-          //need to check for non pair cards high card
-          this.compareTwoPairHighCards(this.playersHighHands);
+        case "Straight Flush":
+        case "Four of a kind":
+          //need to check this
+          this.compareHighCards(this.playersHighHands);
           break;
 
         case "Full House":
           this.compareFullHouseCards(this.playersHighHands);
           break;
 
-        case "Pair":
-          this.comparePairHighCards(this.playersHighHands);
-          break;
-        //need to check for non pair cards high card
-
-        case "High card":
-          this.compareCards(this.playersHighHands);
-          break;
-
-        case "Straight Flush":
         case "Flush":
+          this.compareHighCards(this.playersHighHands);
+          break;
+
         case "Straight":
         case "Three of a kind":
+          this.compareHighCards(this.playersHighHands);
+          break;
+
+        case "Three of a kind":
+          this.compareHighCards(this.playersHighHands);
+          break;
+
+        case "Two pairs":
+          console.log("reached two pair compare");
+          this.compareTwoPairHighCards(this.playersHighHands);
+          break;
+
+        case "Pair":
+          console.log("reached single pair compare");
+          this.comparePairHighCards(this.playersHighHands);
+          break;
+
         case "High card":
         default:
-          this.compareHighCards(this.playersHighHands);
+          this.compareCards(this.playersHighHands);
           break;
       }
     }
@@ -2985,7 +2996,27 @@ var getHandValue = /*#__PURE__*/function (_handChecks) {
   _createClass(getHandValue, [{
     key: "checkValue",
     value: function checkValue() {
-      if (this.royalFlushCheck(this.playersCards)) {} else if (this.straightFlushCheck(this.playersCards)) {} else if (this.quadsCheck(this.playersCards)) {} else if (this.bookCheck(this.playersCards)) {} else if (this.flushCheck(this.playersCards)) {} else if (this.straightCheck(this.playersCards)) {} else if (this.tripsCheck(this.playersCards)) {} else if (this.twoPair(this.playersCards)) {} else if (this.singlePair(this.playersCards)) {} else if (this.highCard(this.playersCards)) {}
+      if (this.royalFlushCheck(this.playersCards)) {
+        return;
+      } else if (this.straightFlushCheck(this.playersCards)) {
+        return;
+      } else if (this.quadsCheck(this.playersCards)) {
+        return;
+      } else if (this.bookCheck(this.playersCards)) {
+        return;
+      } else if (this.flushCheck(this.playersCards)) {
+        return;
+      } else if (this.straightCheck(this.playersCards)) {
+        return;
+      } else if (this.tripsCheck(this.playersCards)) {
+        return;
+      } else if (this.twoPair(this.playersCards)) {
+        return;
+      } else if (this.singlePair(this.playersCards)) {
+        return;
+      } else if (this.highCard(this.playersCards)) {
+        return;
+      }
     }
   }]);
 
@@ -3126,7 +3157,7 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
         hand: []
       });
 
-      for (var i = 0; i < 5; i++) {
+      for (var i = 0; i < 2; i++) {
         players.push({
           id: Math.floor(Math.random() * 1000),
           name: "".concat(_helpers_textFormatting__WEBPACK_IMPORTED_MODULE_2__.default.ucFirst(_service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.adjectives[Math.floor(Math.random() * _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.adjectives.length)]), " ").concat(_service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.animals[Math.floor(Math.random() * _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.animals.length)]),
@@ -3141,7 +3172,6 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
           commit = _ref7.commit,
           getters = _ref7.getters;
       var i = 0;
-      console.log("reached deal cards", i);
 
       while (i < 5) {
         for (var j = 0; j < state.players.length; j++) {
@@ -3178,17 +3208,23 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
 
               case 4:
                 matchingHighHands = _context.sent;
+                console.log({
+                  matchingHighHands: matchingHighHands
+                });
 
                 if (!(matchingHighHands.length > 1)) {
-                  _context.next = 19;
+                  _context.next = 21;
                   break;
                 }
 
                 //use service to loop through the matching high hands
-                gameResult = new _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.compareHighHands(matchingHighHands); // console.log("Matching high hands check", {gameResult});
+                gameResult = new _service_PokerHands__WEBPACK_IMPORTED_MODULE_1__.compareHighHands(matchingHighHands);
+                console.log("matchingHighHands.length > 1, Matching high hands check", {
+                  gameResult: gameResult
+                });
 
                 if (!gameResult.splitPotHands.length) {
-                  _context.next = 12;
+                  _context.next = 14;
                   break;
                 }
 
@@ -3199,14 +3235,14 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
                   message: message,
                   playerIds: playerIds
                 });
-                _context.next = 17;
+                _context.next = 19;
                 break;
 
-              case 12:
-                _context.next = 14;
+              case 14:
+                _context.next = 16;
                 return getters.winningHandMessage(gameResult.highestHand);
 
-              case 14:
+              case 16:
                 rank = _context.sent;
                 // ToDo: SHould remove the arrayIndex set in the PokerHands Service and use the getter instead...
                 commit('SET_HAND_VALUE', {
@@ -3218,26 +3254,29 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
                   message: rank.message
                 });
 
-              case 17:
-                _context.next = 30;
+              case 19:
+                _context.next = 33;
                 break;
 
-              case 19:
-                _context.next = 21;
+              case 21:
+                _context.next = 23;
                 return getters.sortHandsByRank.shift();
 
-              case 21:
+              case 23:
                 winningHand = _context.sent;
-                _context.next = 24;
+                _context.next = 26;
                 return getters.handArrayIndex(winningHand);
 
-              case 24:
+              case 26:
                 arrayId = _context.sent;
-                _context.next = 27;
+                _context.next = 29;
                 return getters.winningHandMessage(winningHand);
 
-              case 27:
+              case 29:
                 _rank = _context.sent;
+                console.log("No mathcing hands", {
+                  winningHand: winningHand
+                });
                 commit('SET_HAND_VALUE', {
                   rank: _rank,
                   arrayId: arrayId
@@ -3247,7 +3286,7 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
                   message: _rank.message
                 });
 
-              case 30:
+              case 33:
               case "end":
                 return _context.stop();
             }
@@ -3275,16 +3314,14 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
     },
     matchingHighHands: function matchingHighHands(state, getters) {
       var sortedPlayersHands = getters.sortHandsByRank,
-          firstHighestHand = sortedPlayersHands[0].handValue.value;
+          firstHighestHand = sortedPlayersHands[0].handValue.value; // console.log({sortedPlayersHands, firstHighestHand});
+
       return sortedPlayersHands.filter(function (player) {
         return player.handValue.value === firstHighestHand;
       });
     },
     winningHandMessage: function winningHandMessage() {
       return function (hand) {
-        console.log({
-          hand: hand
-        });
         var message = '';
 
         switch (hand.handValue.type) {
@@ -3302,6 +3339,7 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
             break;
 
           default:
+            console.log("default message, card:", hand.handValue.highCard.card);
             message = "".concat(hand.handValue.highCard.card[1], " high,");
         }
 
@@ -3324,7 +3362,7 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
             highCardMessage = highCard.value;
 
         if (highCardMessage > 9) {
-          highCardMessage = highCard.card[1];
+          highCardMessage = highCard.card.splice(1);
         }
 
         if (_toConsumableArray(splitPotHands).length === 2) {
@@ -3334,11 +3372,11 @@ vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vuex__WEBPACK_IMPORTED_MODULE_4__.d
         names = names.slice(0, names.length);
 
         if (firstHighCard.handValue.type === "Two pairs") {
-          highCardMessage = "".concat(firstHighCard.handValue.highCard[0].card[1]);
+          highCardMessage = "".concat(firstHighCard.handValue.highCard[0].card.splice(1));
         }
 
         if (firstHighCard.handValue.type === "Full House") {
-          highCardMessage = "".concat(firstHighCard.handValue.highCard.trips.highCard.card[1]);
+          highCardMessage = "".concat(firstHighCard.handValue.highCard.trips.highCard.card.splice(1));
         }
 
         return "Split pot for players ".concat(names, " with ").concat(firstHighCard.handValue.type.toLowerCase(), ", ").concat(highCardMessage, " high.");

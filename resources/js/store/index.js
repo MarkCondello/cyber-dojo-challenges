@@ -62,7 +62,7 @@ export default new Vuex.Store({
         resetGame({commit}){
             commit("SET_CARDS");
             commit("SET_HANDS");
-            commit("SET_MESSAGE")
+            commit("SET_MESSAGE");
         },
         addPlayers({commit},  playersName){
             let players = [];
@@ -71,14 +71,14 @@ export default new Vuex.Store({
                 name: playersName,
                 hand:[],
             });
-            for(let i = 0; i < 5; i++){
+            for(let i = 0; i < 2; i++){
                 players.push(
                     {
                         id: Math.floor(Math.random() * 1000),
                         name: `${textFormatting.ucFirst(adjectives[Math.floor(Math.random() * adjectives.length)])} ${animals[Math.floor(Math.random() * animals.length)]}`,
                         hand:[],
                     }
-                )
+                );
             }
             commit("SET_PLAYERS", players);
         },
@@ -86,7 +86,6 @@ export default new Vuex.Store({
             { state, commit, getters },
         ){
             let i = 0;
-            console.log("reached deal cards", i);
             while(i < 5){
                 for(let j = 0; j < state.players.length; j++) {
                     let cardIndex = getters.randomCardIndex,
@@ -105,9 +104,10 @@ export default new Vuex.Store({
                 commit('SET_HAND_VALUE', {rank, arrayId}); 
             });
             let matchingHighHands = await getters.matchingHighHands;
+            console.log({matchingHighHands})
             if(matchingHighHands.length > 1 ) { //use service to loop through the matching high hands
                 let gameResult = new compareHighHands(matchingHighHands);
-                // console.log("Matching high hands check", {gameResult});
+                  console.log("matchingHighHands.length > 1, Matching high hands check", {gameResult});
                 if(gameResult.splitPotHands.length){  
                     let message = getters.splitPotMessage(gameResult.splitPotHands),
                     playerIds = gameResult.splitPotHands.map(hand => hand.id);
@@ -122,6 +122,7 @@ export default new Vuex.Store({
                 let winningHand = await getters.sortHandsByRank.shift(),
                 arrayId = await getters.handArrayIndex(winningHand), 
                 rank = await getters.winningHandMessage(winningHand);
+                console.log("No mathcing hands", {winningHand})
                 commit('SET_HAND_VALUE', {rank, arrayId}); 
                 commit('SET_WINNING_HAND', { playerId : winningHand.id, message: rank.message })
             }
@@ -143,16 +144,17 @@ export default new Vuex.Store({
         matchingHighHands: (state, getters) => {
             let sortedPlayersHands = getters.sortHandsByRank,
             firstHighestHand = sortedPlayersHands[0].handValue.value;
+            // console.log({sortedPlayersHands, firstHighestHand});
             return sortedPlayersHands.filter(player => player.handValue.value === firstHighestHand);
         },
         winningHandMessage: () => (hand) => {
-            console.log({hand})
             let message = '';
 
             switch(hand.handValue.type){
                 case "Royal Flush":
+                case "Flush":
                 case "Four of a kind":
-                    message = '';
+                    message = 'a';
                 break;
                 case "Two pairs":
                     message = `a ${hand.handValue.highCard[0].card[1]} high,`;
@@ -161,6 +163,7 @@ export default new Vuex.Store({
                     message = `a ${hand.handValue.highCard.trips.highCard.value} high,`;
                 break;
                 default:
+                    console.log("default message, card:", hand.handValue.highCard.card)
                     message = `${hand.handValue.highCard.card[1]} high,`;
             }
             if(hand.handValue.kicker){
@@ -177,18 +180,17 @@ export default new Vuex.Store({
             highCardMessage = highCard.value;
 
             if(highCardMessage > 9){
-                highCardMessage = highCard.card[1]; 
+                highCardMessage = highCard.card.splice(1); 
             }
-
             if([...splitPotHands].length === 2){
                 names = names.replaceAll(", ", " & ");
             }
             names = names.slice(0, names.length);
             if(firstHighCard.handValue.type === "Two pairs"){  
-                highCardMessage = `${firstHighCard.handValue.highCard[0].card[1]}`;
+                highCardMessage = `${firstHighCard.handValue.highCard[0].card.splice(1)}`;
             }
             if(firstHighCard.handValue.type === "Full House"){  
-                highCardMessage = `${firstHighCard.handValue.highCard.trips.highCard.card[1]}`;
+                highCardMessage = `${firstHighCard.handValue.highCard.trips.highCard.card.splice(1)}`;
             }
             return `Split pot for players ${names} with ${firstHighCard.handValue.type.toLowerCase()}, ${highCardMessage} high.`
         },

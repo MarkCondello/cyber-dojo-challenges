@@ -25,27 +25,35 @@ export class compareHighHands extends compareHighHandsHelpers{
          case "Royal Flush":
             this.splitPotHands = this.playersHighHands;
             break;
-         case "Two pairs":
-            //need to check for non pair cards high card
-             this.compareTwoPairHighCards(this.playersHighHands);
+         case "Straight Flush":
+         case "Four of a kind": //need to check this
+            this.compareHighCards(this.playersHighHands);
             break;
          case "Full House":
             this.compareFullHouseCards(this.playersHighHands);
             break;
-         case "Pair":
-            this.comparePairHighCards(this.playersHighHands);
-            break;  //need to check for non pair cards high card
-         case "High card":
-            this.compareCards(this.playersHighHands);
-            break;
-         case "Straight Flush":
          case "Flush":
+            this.compareHighCards(this.playersHighHands);
+            break;
          case "Straight":
-         case "Three of a kind":
-         case "High card":
-         default :
+            case "Three of a kind":
             this.compareHighCards(this.playersHighHands);
             break
+         case "Three of a kind":
+               this.compareHighCards(this.playersHighHands);
+            break;
+         case "Two pairs":
+            console.log("reached two pair compare")
+             this.compareTwoPairHighCards(this.playersHighHands);
+            break;
+         case "Pair":
+            console.log("reached single pair compare")
+               this.comparePairHighCards(this.playersHighHands);
+               break;
+         case "High card":
+         default :
+            this.compareCards(this.playersHighHands);
+            break;
       }
    }
 }
@@ -59,15 +67,34 @@ export class getHandValue extends handChecks{
    }
    checkValue(){
       if(this.royalFlushCheck(this.playersCards)){
+         return;
       } else if(this.straightFlushCheck(this.playersCards)){
+         return;
+
       } else if(this.quadsCheck(this.playersCards)){
+         return;
+
       } else if(this.bookCheck(this.playersCards)){
+         return;
+
       } else if(this.flushCheck(this.playersCards)){
+         return;
+
       } else if(this.straightCheck(this.playersCards)){
+         return;
+
       } else if(this.tripsCheck(this.playersCards)){
+         return;
+
       } else if(this.twoPair(this.playersCards)){
-      } else if(this.singlePair(this.playersCards)){   
+         return;
+
+      } else if(this.singlePair(this.playersCards)){  
+         return;
+ 
       } else if(this.highCard(this.playersCards)){
+         return;
+
       }
    }
 }
