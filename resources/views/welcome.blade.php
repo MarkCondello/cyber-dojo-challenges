@@ -44,7 +44,7 @@
                     ],
                     (object)[
                         "id" => 987765,
-                        "name" => "blue",
+                        "name" => "blues",
                         "hand" => [],
                     ],
                 ];

@@ -1,23 +1,81 @@
 https://cyber-dojo.org/creator/choose_problem?type=single
 
-Poker Hands
-Phase 1
-I will build a JS system which campares to two 5card hands and scores them based on the best hand.
-The hands will be randomly generated and for this phase, will use the same deck for each hand.
-Checking the best hand is based on the presedence of the ranking for the users cards.
+Remove Duplicates
+Define a function RemoveDuplicate(nlist) to remove duplicate elements from list.
 
-high card
-1 pair DONE
-2 pairs DONE
-3 of a kind DONE
-straight DONE
-flush DONE
-full house DONE
-4 of a kind DONE
-straight flush DONE
-royal flush DONE
+Here are some examples:
 
-If players have the same hand, we need a check for higher value.
-If players have the same hand and same value, we need to provide a split pot.
+[] -> []
 
-Include fontawesome to display the Suits
+[1,2] -> [1,2]
+
+[1,1,2,2,3,3] -> [1,2,3]
+var nums = [1,1,2,2,3,3],
+unique = [];
+
+function RemoveDuplicate(nlist){
+    nlist.forEach(num=>{
+        if(!unique.includes(num)){
+            unique.push(num);
+        }
+    });
+}
+RemoveDuplicates(nums);
+console.log({unique})
+Author: Ramya V, KGISL
+------
+
+ABC problem
+You are given a collection of ABC blocks (maybe like the ones you had when you were a kid).
+There are twenty blocks with two letters on each block.
+A complete alphabet is guaranteed amongst all sides of the blocks.
+The sample collection of blocks:
+
+ (B O)
+ (X K)
+ (D Q)
+ (C P)
+ (N A)
+ (G T)
+ (R E)
+ (T G)
+ (Q D)
+ (F S)
+ (J W)
+ (H U)
+ (V I)
+ (A N)
+ (O B)
+ (E R)
+ (F S)
+ (L Y)
+ (P C)
+ (Z M)
+
+Task
+Write a function that takes a string (word) and determines whether the word can be spelled with the given collection of blocks.
+The rules are simple:
+   1. Once a letter on a block is used that block cannot be used again
+   2. The function should be case-insensitive
+   3. Show the output on this page for the following 7 words in the following example
+
+Example
+
+>>> can_make_word("A")
+True
+>>> can_make_word("BARK")
+True
+>>> can_make_word("BOOK")
+False
+>>> can_make_word("TREAT")
+True
+>>> can_make_word("COMMON")
+False
+>>> can_make_word("SQUAD")
+True
+>>> can_make_word("CONFUSE")
+True
+
+[Source https://rosettacode.org/wiki/ABC_Problem]
+
+     
